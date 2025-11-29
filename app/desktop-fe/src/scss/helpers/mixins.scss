@@ -1,0 +1,135 @@
+@use "sass:meta";
+@use "sass:map";
+@use "../values.scss" as *;
+
+@mixin box-sizing {
+  box-sizing: border-box;
+  * {
+    box-sizing: border-box;
+  }
+}
+
+@mixin centered($width, $padding: 30px) {
+  & {
+    width: 100%;
+    max-width: $width;
+    margin: 0 auto;
+  }
+  
+  @media (max-width: calc(#{$width} + #{$padding} * 2)) {
+    width: calc(100% - #{$padding} * 2);
+    margin-left: $padding;
+    margin-right: $padding;
+  }
+}
+
+@mixin responsive($size, $range: false, $min: false) {
+  @if meta.type-of($size) == number {
+    @if $min {
+      @media (min-width: $size) { @content; }
+    } @else {
+      @media (max-width: $size) { @content; }
+    }
+  } @else {
+    @if map.has-key($breakpoints, $size) {
+      $bp: map.get($breakpoints, $size);
+      @if meta.type-of($bp) == number {
+        @media (max-width: $bp) { @content; }
+      } @else if map.has-key($bp, min) and map.has-key($bp, max) and $range {
+        @media (min-width: map.get($bp, min)) and (max-width: map.get($bp, max)) { @content; }
+      } @else if map.has-key($bp, max) {
+        @media (max-width: map.get($bp, max)) { @content; }
+      } @else if map.has-key($bp, min) {
+        @media (min-width: map.get($bp, min)) { @content; }
+      } @else {
+        @error "RESPONSIVE: $breakpoint value for '#{$size}' is of an unsupported type.";
+      }
+    } @else {
+      @error "RESPONSIVE: '#{$size}' is not defined within $breakpoints. Currently defined breakpoints: '#{map-keys($breakpoints)}'";
+    }
+  }
+}
+
+@mixin clearfix {
+  &:before,
+  &:after {
+    content: "";
+    display: table;
+  }
+  &:after {
+    clear: both;
+  }
+}
+
+@mixin nth-range($start, $end) {
+  @for $i from $start through $end {
+    &:nth-child(#{$i}) {
+      @content;
+    }
+  }
+}
+
+@mixin transition-sequence($timing-gap, $elCount, $initial-delay: 0) {
+  @for $i from 1 through $elCount {
+    &:nth-child(#{$i}) {
+      transition-delay: 0ms + $initial-delay + ($timing-gap * $i);
+    }
+  }
+}
+
+@mixin animation-sequence($timing-gap, $elCount, $initial-delay: 0) {
+  @for $i from 1 through $elCount {
+    &:nth-child(#{$i}) {
+      animation-delay: 0ms + $initial-delay + ($timing-gap * $i);
+    }
+  }
+}
+
+@mixin ghost-center($child: '.ghost-center__child') {
+  &:before {
+    content: '';
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
+    margin-right: -0.28em;
+  }
+  #{$child} {
+    display: inline-block;
+    vertical-align: middle;
+  }
+}
+
+@mixin text-ellipsis($nowrap: true) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  @if $nowrap {
+    white-space: nowrap;
+  }
+}
+
+@mixin font-smooth($smooth: true) {
+  @if $smooth {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  } @else {
+    -webkit-font-smoothing: subpixel-antialiased;
+    -moz-osx-font-smoothing: none;
+  }
+}
+
+@mixin ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin setup-perspective($depth: $perspective-depth, $origin: center center) {
+  perspective: $depth;
+  perspective-origin: $origin;
+  transform-style: preserve-3d;
+}
+
+@mixin anchor-fill($z-index: z-layer(base, +1)) {
+  @include fill-parent();
+  z-index: $z-index;
+}

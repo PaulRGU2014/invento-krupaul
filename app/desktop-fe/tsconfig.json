@@ -19,13 +19,17 @@
       }
     ],
     "paths": {
-      "components/*": ["./src/*"]
-    }
+      "@/*": ["./src/*"],
+      "@components/*": ["./src/components/*"],
+      "@scss/*": ["./src/scss/*"]
+    },
+    "typeRoots": ["./src/types", "./node_modules/@types"]
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
+    "**/*.d.ts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"

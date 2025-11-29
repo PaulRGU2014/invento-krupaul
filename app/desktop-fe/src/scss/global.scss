@@ -1,0 +1,217 @@
+@use "./helpers/import.scss" as *;
+@import "normalize.css";
+
+html {
+  font-family: var(--font-inter), sans-serif;
+}
+
+body {
+  background-color: $black;
+  .content-area {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    background-color: $black;
+  }
+}
+
+h1 {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 96px;
+  margin: 0 0 20px 0;
+  font-weight: 400;
+  line-height: 150%;
+  word-break: break-word;
+  hyphens: auto;
+  @include responsive(lg) {
+    font-size: 72px;
+  }
+  @include responsive(md) {
+    font-size: 56px;
+  }
+  @include responsive(sm) {
+    font-size: 48px;
+  }
+}
+
+h2 {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 72px;
+  margin: 0 0 20px 0;
+  font-weight: 400;
+  line-height: 150%;
+  word-break: break-word;
+  hyphens: auto;
+  @include responsive(lg) {
+    font-size: 56px;
+  }
+  @include responsive(md) {
+    font-size: 48px;
+  }
+  @include responsive(sm) {
+    font-size: 36px;
+  }
+}
+
+h3 {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 54px;
+  line-height: 150%;
+  margin: 0 0 20px 0;
+  font-weight: 400;
+  word-break: break-word;
+  @include responsive(lg) {
+    font-size: 48px;
+  }
+  @include responsive(md) {
+    font-size: 36px;
+  }
+  @include responsive(sm) {
+    font-size: 28px;
+  }
+}
+
+h4 {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 40px;
+  line-height: 150%;
+  margin: 0 0 20px 0;
+  font-weight: 400;
+  word-break: break-word;
+  @include responsive(lg) {
+    font-size: 36px;
+  }
+  @include responsive(md) {
+    font-size: 28px;
+    margin: 0 0 10px 0;
+  }
+  @include responsive(sm) {
+    font-size: 24px;
+  }
+}
+
+h5 {
+  font-family: var(--font-inter), sans-serif;
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 150%;
+  margin: 0 0 20px 0;
+  word-break: break-word;
+  @include responsive(lg) {
+    font-size: 28px;
+  }
+  @include responsive(md) {
+    font-size: 24px;
+  }
+  @include responsive(sm) {
+    font-size: 20px;
+  }
+}
+
+h6 {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 24px;
+  line-height: 150%;
+  margin: 0 0 20px 0;
+  word-break: break-word;
+  font-weight: 400;
+  @include responsive(md) {
+    font-size: 22px;
+    margin: 0 0 15px 0;
+  }
+  @include responsive(sm) {
+    font-size: 20px;
+    margin: 0 0 10px 0;
+  }
+}
+
+a {
+  font-family: var(--font-inter), sans-serif;
+  text-decoration: none;
+  font-size: 18px;
+  line-height: 1.5;
+  margin: 0 0 20px 0;
+  cursor: pointer;
+  &:hover {
+    color: $yellow-100;
+  }
+  @include responsive(md) {
+    font-size: 16px;
+  }
+}
+
+ul {
+  font-family: var(--font-inter), sans-serif;
+  margin: 0 0 20px 0;
+  padding: 0 0 0 30px;
+}
+
+li,
+div {
+  font-family: var(--font-inter), sans-serif;
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.5;
+  word-break: break-word;
+  box-sizing: border-box;
+  @include responsive(md) {
+    font-size: 16px;
+  }
+}
+
+p {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 18px;
+  line-height: 1.5;
+  margin: 0 0 20px 0;
+  word-break: break-word;
+  @include responsive(md) {
+    font-size: 16px;
+  }
+}
+
+button {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 18px;
+  line-height: 1.5;
+  margin: 0 0 20px 0;
+  cursor: pointer;
+  // get rid of default button styles
+  border: none;
+  background: none;
+  padding: 0;
+  &:hover {
+    color: $yellow-300;
+  }
+  @include responsive(lg) {
+    font-size: 16px;
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Full viewport height */
+}
+
+.loading::before {
+  content: "";
+  width: 50px;
+  height: 50px;
+  border: 5px solid #ccc;
+  border-top: 5px solid $yellow-500; /* Change this color to your preference */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 20px;
+}
