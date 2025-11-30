@@ -2,22 +2,15 @@
 @import "normalize.css";
 
 html {
-  font-family: var(--font-inter), sans-serif;
+  font-family: var(--font-inter), var(--font-noto-sans-thai-looped), sans-serif;
 }
 
 body {
-  background-color: $black;
-  .content-area {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    width: 100%;
-    background-color: $black;
-  }
+  background-color: $blue-50;
 }
 
 h1 {
-  font-family: var(--font-inter), sans-serif;
+  font-family: var(--font-inter), var(--font-noto-sans-thai-looped), sans-serif;
   font-size: 96px;
   margin: 0 0 20px 0;
   font-weight: 400;
@@ -36,7 +29,7 @@ h1 {
 }
 
 h2 {
-  font-family: var(--font-inter), sans-serif;
+  font-family: var(--font-inter), var(--font-noto-sans-thai-looped), sans-serif;
   font-size: 72px;
   margin: 0 0 20px 0;
   font-weight: 400;
@@ -55,7 +48,7 @@ h2 {
 }
 
 h3 {
-  font-family: var(--font-inter), sans-serif;
+  font-family: var(--font-inter), var(--font-noto-sans-thai-looped), sans-serif;
   font-size: 54px;
   line-height: 150%;
   margin: 0 0 20px 0;
@@ -73,7 +66,7 @@ h3 {
 }
 
 h4 {
-  font-family: var(--font-inter), sans-serif;
+  font-family: var(--font-inter), var(--font-noto-sans-thai-looped), sans-serif;
   font-size: 40px;
   line-height: 150%;
   margin: 0 0 20px 0;
@@ -92,7 +85,7 @@ h4 {
 }
 
 h5 {
-  font-family: var(--font-inter), sans-serif;
+  font-family: var(--font-inter), var(--font-noto-sans-thai-looped), sans-serif;
   font-weight: 400;
   font-size: 32px;
   line-height: 150%;
@@ -110,7 +103,7 @@ h5 {
 }
 
 h6 {
-  font-family: var(--font-inter), sans-serif;
+  font-family: var(--font-inter), var(--font-noto-sans-thai-looped), sans-serif;
   font-size: 24px;
   line-height: 150%;
   margin: 0 0 20px 0;
@@ -127,14 +120,14 @@ h6 {
 }
 
 a {
-  font-family: var(--font-inter), sans-serif;
+  font-family: var(--font-inter), var(--font-noto-sans-thai-looped), sans-serif;
   text-decoration: none;
-  font-size: 18px;
+  font-size: 16px;
   line-height: 1.5;
   margin: 0 0 20px 0;
   cursor: pointer;
   &:hover {
-    color: $yellow-100;
+    // color: $yellow-100;
   }
   @include responsive(md) {
     font-size: 16px;
@@ -142,16 +135,16 @@ a {
 }
 
 ul {
-  font-family: var(--font-inter), sans-serif;
+  font-family: var(--font-inter), var(--font-noto-sans-thai-looped), sans-serif;
   margin: 0 0 20px 0;
   padding: 0 0 0 30px;
 }
 
 li,
 div {
-  font-family: var(--font-inter), sans-serif;
+  font-family: var(--font-inter), var(--font-noto-sans-thai-looped), sans-serif;
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
   line-height: 1.5;
   word-break: break-word;
   box-sizing: border-box;
@@ -161,8 +154,8 @@ div {
 }
 
 p {
-  font-family: var(--font-inter), sans-serif;
-  font-size: 18px;
+  font-family: var(--font-inter), var(--font-noto-sans-thai-looped), sans-serif;
+  font-size: 16px;
   line-height: 1.5;
   margin: 0 0 20px 0;
   word-break: break-word;
@@ -172,21 +165,13 @@ p {
 }
 
 button {
-  font-family: var(--font-inter), sans-serif;
-  font-size: 18px;
+  font-family: var(--font-inter), var(--font-noto-sans-thai-looped), sans-serif;
+  font-size: 16px;
   line-height: 1.5;
-  margin: 0 0 20px 0;
   cursor: pointer;
-  // get rid of default button styles
   border: none;
   background: none;
   padding: 0;
-  &:hover {
-    color: $yellow-300;
-  }
-  @include responsive(lg) {
-    font-size: 16px;
-  }
 }
 
 @keyframes spin {
@@ -210,7 +195,7 @@ button {
   width: 50px;
   height: 50px;
   border: 5px solid #ccc;
-  border-top: 5px solid $yellow-500; /* Change this color to your preference */
+  // border-top: 5px solid $yellow-500; /* Change this color to your preference */
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-right: 20px;

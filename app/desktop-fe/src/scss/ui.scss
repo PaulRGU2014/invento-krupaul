@@ -18,16 +18,15 @@
 }
 
 %button {
-  display: block;
-  background-color: $red-100;  
-  color: $white;
-  padding: 15px 30px;
-  text-align: center;
-  border-radius: 8px;
-  @extend %nav;
+  width: 100%;
+  background-color: $blue-600;
+  border-radius: 10px;
+  color: $black;
+  border: none;
+  padding: 12px 20px;
+  cursor: pointer;
   &:hover {
-    color: $black;
-    background-color: $yellow-100;
+    background-color: $blue-700;
     transition: all 0.3s $ease-out-quint;
   }
   &:not(:hover) {
@@ -35,28 +34,19 @@
   }
 }
 
-%button-round {
-  display: block;
-  color: $white;
-  background-color: $red-100;
-  padding: 10px 20px;
-  text-align: center;
-  border-radius: 8px;
-  &:hover {
-    color: $black;
-    background-color: $yellow-100;
-    transition: all 0.3s $ease-out-quint;
-  }
-  &:not(:hover) {
-    transition: all 0.3s $ease-out-quint;
-  }
+%button-blue {
+  width: 100%;
+  background-color: $blue-600;
+  border-radius: 10px;
+  color: white;
+  @extend %button;
 }
 
 %badge {
   position: absolute;
   top: -10px;
   right: -10px;
-  background-color: $red-100;
+  // background-color: $red-100;
   color: $white;
   border-radius: 50%;
   padding: 5px;
@@ -204,7 +194,7 @@
   margin: 0 0 20px 0;
   cursor: pointer;
   &:hover {
-    color: $yellow-200;
+    // color: $yellow-200;
   }
   @include responsive(md) {
     font-size: 16px;

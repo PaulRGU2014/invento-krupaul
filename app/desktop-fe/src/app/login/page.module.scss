@@ -1,0 +1,74 @@
+@use "../../scss/helpers/import" as *;
+
+.loginContainer {
+  @include centered(480px);
+  margin-top: $standard-vertical-spacing;
+  margin-bottom: $standard-vertical-spacing;
+}
+
+.loginHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.logo {
+  padding: 16px;
+  background-color: $blue-600;
+  border-radius: 16px;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 16px;
+  svg {
+    stroke: $white;
+  }
+}
+
+.loginForm {
+  background-color: $white;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px #0000001a, 0 8px 10px -6px #0000001a;
+}
+
+.loginTitle {
+  font-size: 16px;
+  font-weight: 400;
+  margin-bottom: 8px;
+}
+
+.loginSubtitle {
+  margin-bottom: 12px;
+  color: $gray-600
+}
+
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;  
+}
+
+.loginData {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  label {
+    color: $gray-700;
+    
+  }
+  input {
+    padding: 16px 16px 16px 44px;
+    border-radius: 10px;
+    border: 1px solid $gray-300;
+  }
+}
+
+.loginButton {
+  @extend %button-blue;
+}
+
+.googleButton {
+  // @extend %button-blue;
+}
