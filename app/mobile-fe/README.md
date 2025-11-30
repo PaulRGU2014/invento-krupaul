@@ -25,6 +25,56 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
+### Auth Layer Added
+
+This mobile app now mirrors the Next.js authentication flow:
+
+- `app/index.tsx` acts as the gate (redirects to `/(tabs)` when authenticated or `login` when not).
+- `app/login.tsx` and `app/signup.tsx` provide credential forms.
+- `app/(tabs)/index.tsx` is the authenticated Home screen replicating Inventory Manager features.
+- Global context in `components/auth-context.tsx` manages token & user data.
+
+#### Backend API Expectations
+
+Set an environment variable for the API base (defaults to `http://localhost:3000/api` if omitted):
+
+```bash
+export EXPO_PUBLIC_API_BASE_URL="http://localhost:3000/api"
+```
+
+Required endpoints (adjust to your backend):
+
+- `POST /auth/login` → `{ token: string, user: { name?, email? } }`
+- `POST /users` → creates a user (signup)
+- `GET /me` → returns current user when `Authorization: Bearer <token>` header is sent
+
+#### Dependencies Added
+
+Two new dependencies were added:
+
+- `expo-secure-store` for secure token storage
+- `axios` for HTTP requests
+
+Install (if not already):
+
+```bash
+npm install expo-secure-store axios
+```
+
+#### Token Storage
+
+Mobile platforms use SecureStore; web falls back to `localStorage` transparently.
+
+#### Logout
+
+The Home screen provides a Logout button which clears the stored token and resets context.
+
+### Development Tips
+
+- Update `auth-context.tsx` if your backend uses refresh tokens or different field names.
+- Replace placeholder alerts in Home screen buttons with real navigation or feature screens.
+- Add additional guarded routes by checking `token` or `user` via `useAuth()`.
+
 ## Get a fresh project
 
 When you're ready, run:

@@ -1,98 +1,52 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { useAuth } from '@/components/auth-context';
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const { user, logout } = useAuth();
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Inventory Manager</Text>
+        <View style={styles.userRow}>
+          <Text style={styles.username}>{user?.name || user?.email || 'Guest'}</Text>
+          <TouchableOpacity style={styles.logoutButton} onPress={() => logout()}>
+            <Text style={styles.logoutText}>Logout</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+      <View style={styles.buttonRow}>
+        <TouchableOpacity style={styles.actionButton} onPress={() => Alert.alert('Dashboard','Dashboard view coming soon')}> 
+          <Text style={styles.actionText}>Dashboard</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.actionButton} onPress={() => Alert.alert('Inventory','Inventory list coming soon')}>
+          <Text style={styles.actionText}>Inventory</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.actionButton} onPress={() => Alert.alert('Add Item','Item form coming soon')}>
+          <Text style={styles.actionText}>Add Item</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.welcomeSection}>
+        <Text style={styles.welcomeHeading}>Welcome{user?.name ? `, ${user.name}` : ''}!</Text>
+        <Text style={styles.welcomeBody}>This is your home page. We’ll hook up Dashboard, Inventory, and ItemForm next based on your Figma components.</Text>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+  container: { flex: 1, padding: 20 },
+  header: { marginBottom: 20 },
+  title: { fontSize: 24, fontWeight: '700' },
+  userRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 8 },
+  username: { fontSize: 16, fontWeight: '500' },
+  logoutButton: { backgroundColor: '#eee', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 6 },
+  logoutText: { fontSize: 14, color: '#333' },
+  buttonRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 24 },
+  actionButton: { flex: 1, backgroundColor: '#007bff', padding: 14, marginHorizontal: 4, borderRadius: 8, alignItems: 'center' },
+  actionText: { color: '#fff', fontWeight: '600' },
+  welcomeSection: { gap: 8 },
+  welcomeHeading: { fontSize: 20, fontWeight: '600' },
+  welcomeBody: { fontSize: 14, lineHeight: 20, color: '#444' },
 });
