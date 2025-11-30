@@ -26,7 +26,6 @@
   padding: 12px 20px;
   cursor: pointer;
   &:hover {
-    background-color: $blue-700;
     transition: all 0.3s $ease-out-quint;
   }
   &:not(:hover) {
@@ -35,11 +34,22 @@
 }
 
 %button-blue {
-  width: 100%;
   background-color: $blue-600;
-  border-radius: 10px;
   color: white;
   @extend %button;
+  &:hover {
+    background-color: $blue-700;
+  }
+}
+
+%button-white {
+  background-color: $white;
+  color: $black;
+  border: 1px solid $gray-300;
+  @extend %button;
+  &:hover {
+    background-color: $gray-50;
+  }
 }
 
 %badge {

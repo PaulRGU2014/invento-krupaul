@@ -62,13 +62,80 @@
     padding: 16px 16px 16px 44px;
     border-radius: 10px;
     border: 1px solid $gray-300;
+    width: 100%;
   }
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 16px;
+  color: $gray-300;
+  font-size: 20px;
+  pointer-events: none;
 }
 
 .loginButton {
   @extend %button-blue;
 }
 
-.googleButton {
-  // @extend %button-blue;
+.divider{
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 20px 0;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid $gray-300;
+  }
+
+  &::before {
+    margin-right: 10px;
+  }
+
+  &::after {
+    margin-left: 10px;
+  }
+}
+
+.orText {
+  font-size: 14px;
+  text-align: center;
+  color: $gray-500;
+}
+
+.buttonWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.socialButton {
+  @extend %button-white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.signupButton {
+  color: $blue-600;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  text-align: center;
+  margin-top: 12px;
+  &:hover {
+    text-decoration: underline;
+  }
 }
