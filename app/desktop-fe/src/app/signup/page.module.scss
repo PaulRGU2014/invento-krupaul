@@ -1,0 +1,138 @@
+@use "../../scss/helpers/import" as *;
+
+.signupContainer {
+  @include centered(480px);
+  margin-top: $standard-vertical-spacing;
+  margin-bottom: $standard-vertical-spacing;
+}
+
+.signupHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.logo {
+  padding: 16px;
+  background-color: $blue-600;
+  border-radius: 16px;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 16px;
+  svg {
+    stroke: $white;
+  }
+}
+
+.signupForm {
+  background-color: $white;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px #0000001a, 0 8px 10px -6px #0000001a;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.signupTitle {
+  font-size: 16px;
+  font-weight: 400;
+  margin-bottom: 8px;
+}
+.signupSubtitle {
+  margin-bottom: 12px;
+  color: $gray-600;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.fieldGroup label {
+  color: $gray-700;
+}
+.fieldGroup input {
+  padding: 16px 16px 16px 44px;
+  border-radius: 10px;
+  border: 1px solid $gray-300;
+  width: 100%;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.inputIcon {
+  position: absolute;
+  left: 16px;
+  color: $gray-300;
+  font-size: 20px;
+  pointer-events: none;
+}
+
+.signupButtonPrimary {
+  @extend %button-blue;
+}
+.socialButton {
+  @extend %button-white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.buttonWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 20px 0;
+}
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid $gray-300;
+}
+.divider::before {
+  margin-right: 10px;
+}
+.divider::after {
+  margin-left: 10px;
+}
+.orText {
+  font-size: 14px;
+  text-align: center;
+  color: $gray-500;
+}
+
+.loginLinkButton {
+  color: $blue-600;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  text-align: center;
+  margin-top: 12px;
+}
+.loginLinkButton:hover {
+  text-decoration: underline;
+}
+
+.errorMessage {
+  color: red;
+  font-size: 14px;
+}
+
+.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
