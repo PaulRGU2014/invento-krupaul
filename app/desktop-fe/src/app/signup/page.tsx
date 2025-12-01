@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { useSupabase } from "@/components/supabase-provider";
 import styles from "./page.module.scss";
 import Logo from "@/components/logo";
 import GoogleLogo from "@/components/google-logo";
@@ -16,7 +16,9 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [googleError, setGoogleError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const { supabase } = useSupabase();
 
   const passwordsMatch = password === confirmPassword;
 
@@ -29,18 +31,18 @@ export default function SignupPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, name: fullName }),
+      const { data, error: signupError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { full_name: fullName } }
       });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({ error: "Signup failed" }));
-        setError(data.error || "Signup failed");
+      if (signupError) {
+        setError(signupError.message || "Signup failed");
         setLoading(false);
         return;
       }
-      router.push("/login");
+      // Optionally auto-login; Supabase may send confirmation email depending on project settings
+      router.replace("/home");
     } catch (err) {
       setError("Network error");
       setLoading(false);
@@ -132,11 +134,24 @@ export default function SignupPage() {
             <button
               className={styles.socialButton}
               type="button"
-              onClick={() => signIn("google", { callbackUrl: "/home" })}
+              onClick={async () => {
+                setGoogleError(null);
+                const redirectBase = process.env.NEXT_PUBLIC_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : '');
+                try {
+                  const { error: oauthError } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: { redirectTo: `${redirectBase}/home` }
+                  });
+                  if (oauthError) setGoogleError(oauthError.message);
+                } catch (e: any) {
+                  setGoogleError(e?.message || 'Google sign-in failed');
+                }
+              }}
             >
               <GoogleLogo width={24} height={24} />
               Continue with Google
             </button>
+            {googleError && <p className={styles.errorMessage}>{googleError}</p>}
             {/* <button
               className={styles.socialButton}
               type="button"

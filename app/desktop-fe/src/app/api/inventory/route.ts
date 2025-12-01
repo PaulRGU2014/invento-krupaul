@@ -1,6 +1,5 @@
 import { NextRequest } from 'next/server';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { getServerSession } from 'next-auth';
 
 function getSupabaseClient(token?: string): SupabaseClient {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
@@ -14,30 +13,10 @@ function getSupabaseClient(token?: string): SupabaseClient {
 }
 
 async function getUserIdFromToken(token: string): Promise<string> {
-  const supabase = getSupabaseClient();
-  const { data, error } = await supabase.auth.getUser(token);
+  const supabase = getSupabaseClient(token);
+  const { data, error } = await supabase.auth.getUser();
   if (error || !data.user) throw new Error('Unauthorized');
   return data.user.id;
-}
-
-function getAdminClient(): SupabaseClient | null {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
-  const service = process.env.SUPABASE_SERVICE_KEY as string;
-  if (!url || !service) return null;
-  return createClient(url, service);
-}
-
-async function getUserIdFromNextAuth(): Promise<string> {
-  const session = await getServerSession();
-  const email = session?.user?.email;
-  if (!email) throw new Error('Unauthorized');
-  const admin = getAdminClient();
-  if (!admin) throw new Error('Service role not configured');
-  const { data, error } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 });
-  if (error) throw new Error('Failed to query Supabase users');
-  const user = data?.users?.find((u: any) => u.email?.toLowerCase() === email.toLowerCase());
-  if (!user) throw new Error('User not found in Supabase');
-  return user.id as string;
 }
 
 export async function GET(req: NextRequest) {
@@ -52,25 +31,27 @@ export async function GET(req: NextRequest) {
       ? authHeader.substring('Bearer '.length)
       : undefined;
 
-    // Prefer token; fallback to NextAuth session + service role
-    const supabase = token ? getSupabaseClient(token) : getAdminClient();
-    if (!supabase) {
+    if (!token) {
       return new Response(
-        JSON.stringify({ success: false, error: 'Service role not configured and Bearer token missing' }),
+        JSON.stringify({ success: false, error: 'Missing Bearer token' }),
         { status: 401, headers: { 'Content-Type': 'application/json' } }
       );
     }
+    const supabase = getSupabaseClient(token);
+    const userIdForFilter = await getUserIdFromToken(token).catch(() => undefined);
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
 
     const { count, error: countError } = await supabase
       .from('inventory_items')
-      .select('*', { count: 'exact', head: true });
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userIdForFilter!);
     if (countError) throw countError;
 
     const { data, error } = await supabase
       .from('inventory_items')
       .select('*')
+      .eq('user_id', userIdForFilter!)
       .order('updated_at', { ascending: false })
       .range(from, to);
     if (error) throw error;
@@ -114,12 +95,12 @@ export async function POST(req: NextRequest) {
     const token = authHeader?.startsWith('Bearer ')
       ? authHeader.substring('Bearer '.length)
       : undefined;
-    const userId = token ? await getUserIdFromToken(token) : await getUserIdFromNextAuth();
-    const body = await req.json();
-    const supabase = token ? getSupabaseClient(token) : getAdminClient();
-    if (!supabase) {
-      return new Response(JSON.stringify({ success: false, error: 'Service role not configured and Bearer token missing' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    if (!token) {
+      return new Response(JSON.stringify({ success: false, error: 'Missing Bearer token' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
     }
+    const userId = await getUserIdFromToken(token);
+    const body = await req.json();
+    const supabase = getSupabaseClient(token);
     const insert = {
       user_id: userId,
       name: body.name,
@@ -161,9 +142,22 @@ export async function PATCH(req: NextRequest) {
       ? authHeader.substring('Bearer '.length)
       : undefined;
     const body = await req.json();
-    const supabase = token ? getSupabaseClient(token) : getAdminClient();
-    if (!supabase) {
-      return new Response(JSON.stringify({ success: false, error: 'Service role not configured and Bearer token missing' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    if (!token) {
+      return new Response(JSON.stringify({ success: false, error: 'Missing Bearer token' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    }
+    const supabase = getSupabaseClient(token);
+    const userId = await getUserIdFromToken(token);
+    // If using admin client, ensure we only update owning user's record
+    let userIdForFilter: string | undefined;
+    if (!token) {
+      try {
+        userIdForFilter = await getUserIdFromNextAuth();
+      } catch (e: any) {
+        return new Response(
+          JSON.stringify({ success: false, error: e?.message || 'Unauthorized' }),
+          { status: 401, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
     }
     const update: any = {};
     if (body.name !== undefined) update.name = body.name;
@@ -177,6 +171,7 @@ export async function PATCH(req: NextRequest) {
       .from('inventory_items')
       .update(update)
       .eq('id', id)
+      .eq('user_id', userId)
       .select()
       .single();
     if (error) throw error;
@@ -208,11 +203,16 @@ export async function DELETE(req: NextRequest) {
     const token = authHeader?.startsWith('Bearer ')
       ? authHeader.substring('Bearer '.length)
       : undefined;
-    const supabase = token ? getSupabaseClient(token) : getAdminClient();
-    if (!supabase) {
-      return new Response(JSON.stringify({ success: false, error: 'Service role not configured and Bearer token missing' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    if (!token) {
+      return new Response(JSON.stringify({ success: false, error: 'Missing Bearer token' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
     }
-    const { error } = await supabase.from('inventory_items').delete().eq('id', id);
+    const supabase = getSupabaseClient(token);
+    const userId = await getUserIdFromToken(token);
+    const { error } = await supabase
+      .from('inventory_items')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', userId);
     if (error) throw error;
     return new Response(JSON.stringify({ success: true, message: 'Deleted' }), { status: 200, headers: { 'Content-Type': 'application/json' } });
   } catch (err: any) {

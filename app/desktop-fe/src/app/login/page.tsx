@@ -1,32 +1,38 @@
 "use client";
 
 import { useState } from "react";
-import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import styles from "./page.module.scss";
 import Logo from "@/components/logo";
 import GoogleLogo from "@/components/google-logo";
 // import FacebookLogo from "@/components/facebook-logo";
 import { HiOutlineMail, HiOutlineLockClosed  } from "react-icons/hi";
+import { useSupabaseSession, useSupabase } from "@/components/supabase-provider";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { authenticated } = useSupabaseSession();
+  const { supabase } = useSupabase();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [googleError, setGoogleError] = useState<string | null>(null);
 
-  if (session) {
+  if (authenticated) {
     router.replace("/home");
   }
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Credentials login via NextAuth
-    signIn("credentials", {
-      email,
-      password,
-      callbackUrl: "/home",
-    });
+    (async () => {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (!error) {
+        router.replace("/home");
+      } else {
+        // handle error (optional toast/UI)
+        // eslint-disable-next-line no-console
+        console.error(error.message);
+      }
+    })();
   };
 
   return (
@@ -79,11 +85,24 @@ export default function LoginPage() {
           <button
             className={styles.socialButton}
             type="button"
-            onClick={() => signIn("google", { callbackUrl: "/home" })}
+            onClick={async () => {
+              setGoogleError(null);
+              const redirectBase = process.env.NEXT_PUBLIC_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : '');
+              try {
+                const { data, error } = await supabase.auth.signInWithOAuth({
+                  provider: 'google',
+                  options: { redirectTo: `${redirectBase}/home` }
+                });
+                if (error) setGoogleError(error.message);
+              } catch (e: any) {
+                setGoogleError(e?.message || 'Google sign-in failed');
+              }
+            }}
           >
             <GoogleLogo width={24} height={24} />
             Continue with Google
           </button>
+          {googleError && <p className={styles.errorMessage}>{googleError}</p>}
           {/* <button
             className={styles.socialButton}
             type="button"

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
+import { useSupabaseSession, useSupabase } from "@/components/supabase-provider";
 import { Package, LogOut, User } from "lucide-react";
 import { InventoryItem } from "@/types/inventory";
 import { fetchInventory, createInventoryItem, updateInventoryItem, deleteInventoryItem } from "@/lib/inventory-api";
@@ -10,24 +10,26 @@ import { Dashboard } from "@/components/dashboard";
 import { InventoryList } from "@/components/inventory-list";
 import { ItemForm } from "@/components/item-form";
 import styles from "./page.module.scss";
+import { EmailConfirmationGuard } from "@/components/email-confirmation-guard";
 
 export default function HomePage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { session, authenticated, loading } = useSupabaseSession();
+  const { supabase } = useSupabase();
   const [activeView, setActiveView] = useState<'dashboard' | 'inventory' | 'add'>('dashboard');
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [loadingItems, setLoadingItems] = useState(false);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (!loading && !authenticated) {
       router.replace("/login");
     }
-  }, [router, status]);
+  }, [router, loading, authenticated]);
 
   useEffect(() => {
     const load = async () => {
-      if (status !== "authenticated") return;
+      if (!authenticated) return;
       setLoadingItems(true);
       try {
         const res = await fetchInventory(1, 100);
@@ -39,7 +41,7 @@ export default function HomePage() {
       }
     };
     load();
-  }, [status]);
+  }, [authenticated]);
 
   const handleAddItem = async (item: Omit<InventoryItem, 'id' | 'lastUpdated'>) => {
     const payload = {
@@ -93,11 +95,12 @@ export default function HomePage() {
     setActiveView('inventory');
   };
 
-  const handleLogout = () => {
-    signOut({ callbackUrl: "/login" });
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.replace('/login');
   };
 
-  if (status === "loading") {
+  if (loading) {
     return (
       <div className={styles.loading}>
         <div>Loading...</div>
@@ -106,6 +109,7 @@ export default function HomePage() {
   }
 
   return (
+    <EmailConfirmationGuard>
     <div className={styles.container}>
       {/* Header */}
       <header className={styles.header}>
@@ -122,7 +126,7 @@ export default function HomePage() {
           <div className={styles.userSection}>
             <div className={styles.userInfo}>
               <User size={20} />
-              <span>{session?.user?.name || session?.user?.email}</span>
+              <span>{(session?.user?.user_metadata as any)?.full_name || session?.user?.email}</span>
             </div>
             <button onClick={handleLogout} className={styles.logoutButton} title="Logout">
               <LogOut size={20} />
@@ -181,5 +185,6 @@ export default function HomePage() {
         )}
       </main>
     </div>
+    </EmailConfirmationGuard>
   );
 }

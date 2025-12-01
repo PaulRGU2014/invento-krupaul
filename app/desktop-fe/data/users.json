@@ -1,1 +1,8 @@
-[]
+[
+  {
+    "id": "1764627219386",
+    "email": "paul@krupaul.com",
+    "passwordHash": "$2b$10$f7r6ROlplLcPY4qdOQz6WeNl0UkQp9lmSwCeK51/Oosxjnmfq.yRO",
+    "name": "Test"
+  }
+]
