@@ -6,6 +6,9 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "mobilefe",
+    "facebookScheme": "fb{YOUR_FACEBOOK_APP_ID}",
+    "facebookAppId": "{YOUR_FACEBOOK_APP_ID}",
+    "facebookDisplayName": "Inventory Manager",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -38,7 +41,8 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,

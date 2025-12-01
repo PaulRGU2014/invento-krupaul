@@ -52,6 +52,15 @@
   }
 }
 
+%button-black {
+  background-color: $black;
+  color: $white;
+  @extend %button;
+  &:hover {
+    background-color: $gray-900;
+  }
+}
+
 %badge {
   position: absolute;
   top: -10px;

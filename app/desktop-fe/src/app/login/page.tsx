@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import styles from "./page.module.scss";
 import Logo from "@/components/logo";
 import GoogleLogo from "@/components/google-logo";
-import FacebookLogo from "@/components/facebook-logo";
+// import FacebookLogo from "@/components/facebook-logo";
 import { HiOutlineMail, HiOutlineLockClosed  } from "react-icons/hi";
 
 export default function LoginPage() {
@@ -30,6 +30,7 @@ export default function LoginPage() {
   };
 
   return (
+    <div className="login">
     <div className={styles.loginContainer}>
       <div className={styles.loginHeader}>
         <div className={styles.logo}>
@@ -83,14 +84,14 @@ export default function LoginPage() {
             <GoogleLogo width={24} height={24} />
             Continue with Google
           </button>
-          <button
+          {/* <button
             className={styles.socialButton}
             type="button"
             onClick={() => signIn("facebook", { callbackUrl: "/home" })}
           >
             <FacebookLogo width={24} height={24} />
             Continue with Facebook
-          </button>
+          </button> */}
         </div>
         <button
           className={styles.signupButton}
@@ -100,6 +101,7 @@ export default function LoginPage() {
           Don't have an account? Sign up
         </button>
       </form>
+    </div>
     </div>
   );
 }

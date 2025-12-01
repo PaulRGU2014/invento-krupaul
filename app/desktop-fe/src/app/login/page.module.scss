@@ -2,8 +2,10 @@
 
 .loginContainer {
   @include centered(480px);
-  margin-top: $standard-vertical-spacing;
-  margin-bottom: $standard-vertical-spacing;
+  padding-top: $standard-vertical-spacing;
+  padding-bottom: $standard-vertical-spacing;
+  height: 100%;
+  min-height: 100vh;
 }
 
 .loginHeader {
@@ -82,7 +84,7 @@
 }
 
 .loginButton {
-  @extend %button-blue;
+  @extend %button-black;
 }
 
 .divider{

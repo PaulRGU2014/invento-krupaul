@@ -12,7 +12,7 @@ import {
 import { useRouter } from "expo-router";
 import { useAuth } from "@/components/auth-context";
 import GoogleLogo from "@/components/google-logo";
-import FacebookLogo from "@/components/facebook-logo";
+// import FacebookLogo from "@/components/facebook-logo";
 import Logo from "@/components/logo";
 
 export default function SignupScreen() {
@@ -61,6 +61,7 @@ export default function SignupScreen() {
               value={name}
               placeholder="Jane Doe"
               onChangeText={setName}
+              placeholderTextColor="#6a7282"
             />
           </View>
         </View>
@@ -75,6 +76,7 @@ export default function SignupScreen() {
               keyboardType="email-address"
               placeholder="you@example.com"
               onChangeText={setEmail}
+              placeholderTextColor="#6a7282"
             />
           </View>
         </View>
@@ -88,6 +90,7 @@ export default function SignupScreen() {
               secureTextEntry
               placeholder="Create a password"
               onChangeText={setPassword}
+              placeholderTextColor="#6a7282"
             />
           </View>
         </View>
@@ -101,6 +104,7 @@ export default function SignupScreen() {
               secureTextEntry
               placeholder="Repeat password"
               onChangeText={setConfirm}
+              placeholderTextColor="#6a7282"
             />
           </View>
         </View>
@@ -141,7 +145,7 @@ export default function SignupScreen() {
               <Text style={styles.socialText}>Continue with Google</Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.socialButton}
             onPress={() => Alert.alert("Facebook", "Not implemented on mobile")}
           >
@@ -149,7 +153,7 @@ export default function SignupScreen() {
               <FacebookLogo width={20} height={20} />
               <Text style={styles.socialText}>Continue with Facebook</Text>
             </View>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         <TouchableOpacity
@@ -168,7 +172,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: 24,
     paddingVertical: 40,
-    backgroundColor: "#f8f9fb",
+    backgroundColor: "#e0e7ff",
     justifyContent: "center",
     alignItems: "center",
   },

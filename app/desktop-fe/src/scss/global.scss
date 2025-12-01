@@ -6,7 +6,12 @@ html {
 }
 
 body {
+  background-color: $white;
+}
+
+.login {
   background-color: $blue-50;
+  min-height: 100vh;
 }
 
 h1 {

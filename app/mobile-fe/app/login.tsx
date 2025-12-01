@@ -11,8 +11,9 @@ import {
 import { useRouter } from "expo-router";
 import { useAuth } from "@/components/auth-context";
 import GoogleLogo from "@/components/google-logo";
-import FacebookLogo from "@/components/facebook-logo";
+// import FacebookLogo from "@/components/facebook-logo";
 import Logo from "@/components/logo";
+// import { useFacebookAuth } from "@/hooks/use-facebook-auth";
 
 export default function LoginScreen() {
   const { login, loading, error } = useAuth();
@@ -20,6 +21,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  // const { promptAsync: promptFacebookAsync } = useFacebookAuth();
 
   const onSubmit = async () => {
     if (!email || !password) return;
@@ -54,6 +56,7 @@ export default function LoginScreen() {
               keyboardType="email-address"
               value={email}
               placeholder="you@example.com"
+              placeholderTextColor="#6a7282"
               onChangeText={setEmail}
             />
           </View>
@@ -67,12 +70,13 @@ export default function LoginScreen() {
               secureTextEntry
               value={password}
               placeholder="Enter your password"
+              placeholderTextColor="#6a7282"
               onChangeText={setPassword}
             />
           </View>
         </View>
 
-        {error && <Text style={styles.error}>{error}</Text>}
+        {error ? <Text style={styles.error}>{error}</Text> : null}
 
         <TouchableOpacity
           style={styles.primaryButton}
@@ -102,21 +106,18 @@ export default function LoginScreen() {
               <Text style={styles.socialText}>Continue with Google</Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.socialButton}
-            onPress={() => Alert.alert("Facebook", "Not implemented on mobile")}
+            onPress={() => promptFacebookAsync()}
           >
             <View style={styles.socialContent}>
               <FacebookLogo width={20} height={20} />
               <Text style={styles.socialText}>Continue with Facebook</Text>
             </View>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
-        <TouchableOpacity
-          style={styles.signupButton}
-          onPress={() => router.push("/signup")}
-        >
+        <TouchableOpacity style={styles.signupButton} onPress={() => router.push("/signup")}>
           <Text style={styles.signupText}>Don't have an account? Sign up</Text>
         </TouchableOpacity>
       </View>
@@ -130,7 +131,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f8f9fb",
+    backgroundColor: "#e0e7ff",
   },
   card: {
     backgroundColor: "#fff",
@@ -141,7 +142,7 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 2,
     width: "100%",
-    maxWidth: 480,    
+    maxWidth: 480,
   },
   header: { alignItems: "center", marginBottom: 16 },
   logoCircle: {
@@ -149,14 +150,14 @@ const styles = StyleSheet.create({
     height: 72,
     borderRadius: 16,
     backgroundColor: "#007bff",
-    marginBottom: 16,
     alignItems: "center",
     justifyContent: "center",
+    marginBottom: 16,
   },
-  title: { fontSize: 20, fontWeight: "700" },
-  subtitle: { fontSize: 14, color: "#6b7280", marginTop: 4 },
+  title: { fontSize: 20, fontFamily: "Inter_700Bold" },
+  subtitle: { fontSize: 14, color: "#6b7280", marginTop: 4, fontFamily: "Inter_400Regular" },
   formGroup: { marginTop: 16 },
-  label: { fontSize: 12, fontWeight: "500", marginBottom: 8, color: "#374151" },
+  label: { fontSize: 12, marginBottom: 8, color: "#374151", fontFamily: "Inter_600SemiBold" },
   inputWrapper: {
     borderWidth: 1,
     borderColor: "#e5e7eb",
@@ -165,8 +166,12 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     backgroundColor: "#fafafa",
   },
-  input: { fontSize: 16 },
-  error: { color: "#b91c1c", marginTop: 8 },
+  input: { 
+    fontSize: 16, 
+    fontFamily: "Inter_400Regular",
+    outlineWidth: 0,
+  },
+  error: { color: "#b91c1c", marginTop: 8, fontFamily: "Inter_400Regular" },
   primaryButton: {
     backgroundColor: "#111827",
     paddingVertical: 14,
@@ -174,7 +179,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 20,
   },
-  primaryButtonText: { color: "#fff", fontWeight: "600", fontSize: 16 },
+  primaryButtonText: { color: "#fff", fontSize: 16, fontFamily: "Inter_600SemiBold" },
   dividerRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -182,7 +187,7 @@ const styles = StyleSheet.create({
     marginVertical: 16,
   },
   divider: { flex: 1, height: 1, backgroundColor: "#e5e7eb" },
-  orText: { color: "#6b7280", fontSize: 12 },
+  orText: { color: "#6b7280", fontSize: 12, fontFamily: "Inter_400Regular" },
   socialRow: { gap: 10 },
   socialButton: {
     borderWidth: 1,
@@ -193,7 +198,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   socialContent: { flexDirection: "row", alignItems: "center", gap: 10 },
-  socialText: { color: "#111827", fontWeight: "500" },
+  socialText: { color: "#111827", fontFamily: "Inter_600SemiBold" },
   signupButton: { marginTop: 14, alignItems: "center" },
-  signupText: { color: "#007bff" },
+  signupText: { color: "#007bff", fontFamily: "Inter_400Regular" },
 });
