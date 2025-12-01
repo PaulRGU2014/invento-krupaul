@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { Package, LogOut, User } from "lucide-react";
 import { InventoryItem } from "@/types/inventory";
+import { fetchInventory, createInventoryItem, updateInventoryItem, deleteInventoryItem } from "@/lib/inventory-api";
 import { Dashboard } from "@/components/dashboard";
 import { InventoryList } from "@/components/inventory-list";
 import { ItemForm } from "@/components/item-form";
@@ -15,63 +16,8 @@ export default function HomePage() {
   const { data: session, status } = useSession();
   const [activeView, setActiveView] = useState<'dashboard' | 'inventory' | 'add'>('dashboard');
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
-  const [items, setItems] = useState<InventoryItem[]>([
-    {
-      id: '1',
-      name: 'Tomatoes',
-      category: 'Vegetables',
-      quantity: 45,
-      unit: 'kg',
-      minStock: 20,
-      price: 2.5,
-      supplier: 'Fresh Farms Co.',
-      lastUpdated: new Date().toISOString(),
-    },
-    {
-      id: '2',
-      name: 'Chicken Breast',
-      category: 'Meat',
-      quantity: 12,
-      unit: 'kg',
-      minStock: 15,
-      price: 8.99,
-      supplier: 'Quality Meats Ltd.',
-      lastUpdated: new Date().toISOString(),
-    },
-    {
-      id: '3',
-      name: 'Olive Oil',
-      category: 'Oils & Condiments',
-      quantity: 8,
-      unit: 'liters',
-      minStock: 10,
-      price: 12.5,
-      supplier: 'Mediterranean Imports',
-      lastUpdated: new Date().toISOString(),
-    },
-    {
-      id: '4',
-      name: 'Pasta',
-      category: 'Dry Goods',
-      quantity: 35,
-      unit: 'kg',
-      minStock: 25,
-      price: 1.8,
-      supplier: 'Italian Foods Inc.',
-      lastUpdated: new Date().toISOString(),
-    },
-    {
-      id: '5',
-      name: 'Milk',
-      category: 'Dairy',
-      quantity: 6,
-      unit: 'liters',
-      minStock: 20,
-      price: 1.2,
-      supplier: 'Local Dairy Farm',
-      lastUpdated: new Date().toISOString(),
-    },
-  ]);
+  const [items, setItems] = useState<InventoryItem[]>([]);
+  const [loadingItems, setLoadingItems] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -79,28 +25,62 @@ export default function HomePage() {
     }
   }, [router, status]);
 
-  const handleAddItem = (item: Omit<InventoryItem, 'id' | 'lastUpdated'>) => {
-    const newItem: InventoryItem = {
-      ...item,
-      id: Date.now().toString(),
-      lastUpdated: new Date().toISOString(),
+  useEffect(() => {
+    const load = async () => {
+      if (status !== "authenticated") return;
+      setLoadingItems(true);
+      try {
+        const res = await fetchInventory(1, 100);
+        if (res?.success && Array.isArray(res.data)) {
+          setItems(res.data);
+        }
+      } finally {
+        setLoadingItems(false);
+      }
     };
-    setItems([...items, newItem]);
-    setActiveView('inventory');
+    load();
+  }, [status]);
+
+  const handleAddItem = async (item: Omit<InventoryItem, 'id' | 'lastUpdated'>) => {
+    const payload = {
+      name: item.name,
+      category: item.category,
+      quantity: item.quantity,
+      unit: item.unit,
+      minStock: item.minStock,
+      price: item.price,
+      supplier: item.supplier,
+    };
+    const res = await createInventoryItem(payload);
+    if (res?.success && res.data) {
+      setItems(prev => [res.data, ...prev]);
+      setActiveView('inventory');
+    }
   };
 
-  const handleUpdateItem = (updatedItem: InventoryItem) => {
-    setItems(items.map(item => 
-      item.id === updatedItem.id 
-        ? { ...updatedItem, lastUpdated: new Date().toISOString() }
-        : item
-    ));
-    setEditingItem(null);
-    setActiveView('inventory');
+  const handleUpdateItem = async (updatedItem: InventoryItem) => {
+    const payload = {
+      name: updatedItem.name,
+      category: updatedItem.category,
+      quantity: updatedItem.quantity,
+      unit: updatedItem.unit,
+      minStock: updatedItem.minStock,
+      price: updatedItem.price,
+      supplier: updatedItem.supplier,
+    };
+    const res = await updateInventoryItem(updatedItem.id, payload);
+    if (res?.success && res.data) {
+      setItems(prev => prev.map(item => item.id === updatedItem.id ? res.data : item));
+      setEditingItem(null);
+      setActiveView('inventory');
+    }
   };
 
-  const handleDeleteItem = (id: string) => {
-    setItems(items.filter(item => item.id !== id));
+  const handleDeleteItem = async (id: string) => {
+    const res = await deleteInventoryItem(id);
+    if (res?.success) {
+      setItems(prev => prev.filter(item => item.id !== id));
+    }
   };
 
   const handleEditItem = (item: InventoryItem) => {
