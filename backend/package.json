@@ -1,0 +1,35 @@
+{
+  "name": "invento-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Invento inventory management system using Supabase",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch functions/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "verify": "tsx scripts/verify.ts",
+    "supabase:login": "supabase login",
+    "supabase:link": "supabase link --project-ref $SUPABASE_PROJECT_REF",
+    "supabase:push": "cd supabase && supabase db push",
+    "supabase:migration:new": "cd supabase && supabase migration new $NAME"
+  },
+  "keywords": [
+    "inventory",
+    "supabase",
+    "api"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.11"
+  }
+}
