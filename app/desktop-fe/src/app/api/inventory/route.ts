@@ -20,12 +20,10 @@ async function getUserIdFromToken(token: string): Promise<string> {
   return data.user.id;
 }
 
-function getAdminClient(): SupabaseClient {
+function getAdminClient(): SupabaseClient | null {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
   const service = process.env.SUPABASE_SERVICE_KEY as string;
-  if (!url || !service) {
-    throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_KEY');
-  }
+  if (!url || !service) return null;
   return createClient(url, service);
 }
 
@@ -34,9 +32,12 @@ async function getUserIdFromNextAuth(): Promise<string> {
   const email = session?.user?.email;
   if (!email) throw new Error('Unauthorized');
   const admin = getAdminClient();
-  const { data, error } = await admin.auth.admin.getUserByEmail(email);
-  if (error || !data?.user) throw new Error('User not found in Supabase');
-  return data.user.id;
+  if (!admin) throw new Error('Service role not configured');
+  const { data, error } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 });
+  if (error) throw new Error('Failed to query Supabase users');
+  const user = data?.users?.find((u: any) => u.email?.toLowerCase() === email.toLowerCase());
+  if (!user) throw new Error('User not found in Supabase');
+  return user.id as string;
 }
 
 export async function GET(req: NextRequest) {
@@ -53,6 +54,12 @@ export async function GET(req: NextRequest) {
 
     // Prefer token; fallback to NextAuth session + service role
     const supabase = token ? getSupabaseClient(token) : getAdminClient();
+    if (!supabase) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Service role not configured and Bearer token missing' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
 
@@ -110,6 +117,9 @@ export async function POST(req: NextRequest) {
     const userId = token ? await getUserIdFromToken(token) : await getUserIdFromNextAuth();
     const body = await req.json();
     const supabase = token ? getSupabaseClient(token) : getAdminClient();
+    if (!supabase) {
+      return new Response(JSON.stringify({ success: false, error: 'Service role not configured and Bearer token missing' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    }
     const insert = {
       user_id: userId,
       name: body.name,
@@ -152,6 +162,9 @@ export async function PATCH(req: NextRequest) {
       : undefined;
     const body = await req.json();
     const supabase = token ? getSupabaseClient(token) : getAdminClient();
+    if (!supabase) {
+      return new Response(JSON.stringify({ success: false, error: 'Service role not configured and Bearer token missing' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    }
     const update: any = {};
     if (body.name !== undefined) update.name = body.name;
     if (body.category !== undefined) update.category = body.category;
@@ -196,6 +209,9 @@ export async function DELETE(req: NextRequest) {
       ? authHeader.substring('Bearer '.length)
       : undefined;
     const supabase = token ? getSupabaseClient(token) : getAdminClient();
+    if (!supabase) {
+      return new Response(JSON.stringify({ success: false, error: 'Service role not configured and Bearer token missing' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    }
     const { error } = await supabase.from('inventory_items').delete().eq('id', id);
     if (error) throw error;
     return new Response(JSON.stringify({ success: true, message: 'Deleted' }), { status: 200, headers: { 'Content-Type': 'application/json' } });
