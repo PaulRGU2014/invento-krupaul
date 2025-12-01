@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./page.module.scss";
 import Logo from "@/components/logo";
@@ -17,21 +17,22 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [googleError, setGoogleError] = useState<string | null>(null);
 
-  if (authenticated) {
-    router.replace("/home");
-  }
+  useEffect(() => {
+    if (authenticated) {
+      router.replace("/home");
+    }
+  }, [authenticated, router]);
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     (async () => {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (!error) {
-        router.replace("/home");
-      } else {
-        // handle error (optional toast/UI)
+      if (error) {
         // eslint-disable-next-line no-console
         console.error(error.message);
+        return;
       }
+      router.replace("/home");
     })();
   };
 
