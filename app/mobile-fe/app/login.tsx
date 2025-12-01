@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/components/auth-context";
@@ -14,6 +15,8 @@ import GoogleLogo from "@/components/google-logo";
 // import FacebookLogo from "@/components/facebook-logo";
 import Logo from "@/components/logo";
 // import { useFacebookAuth } from "@/hooks/use-facebook-auth";
+import { useGoogleAuth } from "@/hooks/use-google-auth";
+import { useGoogleAuthWeb } from "@/hooks/use-google-auth-web";
 
 export default function LoginScreen() {
   const { login, loading, error } = useAuth();
@@ -21,7 +24,31 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const { signIn: googleSignIn } = useGoogleAuth();
+  const { signIn: googleSignInWeb, isReady: isWebReady } = useGoogleAuthWeb();
   // const { promptAsync: promptFacebookAsync } = useFacebookAuth();
+
+  const handleGoogleSignIn = async () => {
+    try {
+      if (Platform.OS === 'web') {
+        const result = await googleSignInWeb();
+        if (result) {
+          Alert.alert(
+            "Google Sign-In Success", 
+            `Welcome ${result.user.name}!\n\nEmail: ${result.user.email}\n\nNote: Backend integration needed to complete login.`
+          );
+        }
+      } else {
+        const userInfo = await googleSignIn();
+        Alert.alert(
+          "Google Sign-In", 
+          `Welcome ${userInfo?.data?.user?.name || 'User'}!\n\nNote: Backend integration needed to complete login.`
+        );
+      }
+    } catch (error: any) {
+      Alert.alert("Google Sign-In Failed", error.message || "Unable to sign in with Google");
+    }
+  };
 
   const onSubmit = async () => {
     if (!email || !password) return;
@@ -99,7 +126,8 @@ export default function LoginScreen() {
         <View style={styles.socialRow}>
           <TouchableOpacity
             style={styles.socialButton}
-            onPress={() => Alert.alert("Google", "Not implemented on mobile")}
+            onPress={handleGoogleSignIn}
+            disabled={Platform.OS === 'web' && !isWebReady}
           >
             <View style={styles.socialContent}>
               <GoogleLogo width={20} height={20} />
