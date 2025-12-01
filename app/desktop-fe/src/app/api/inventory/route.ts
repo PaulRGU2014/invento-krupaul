@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { getServerSession } from 'next-auth';
 
 function getSupabaseClient(token?: string): SupabaseClient {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
@@ -19,6 +20,25 @@ async function getUserIdFromToken(token: string): Promise<string> {
   return data.user.id;
 }
 
+function getAdminClient(): SupabaseClient {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
+  const service = process.env.SUPABASE_SERVICE_KEY as string;
+  if (!url || !service) {
+    throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_KEY');
+  }
+  return createClient(url, service);
+}
+
+async function getUserIdFromNextAuth(): Promise<string> {
+  const session = await getServerSession();
+  const email = session?.user?.email;
+  if (!email) throw new Error('Unauthorized');
+  const admin = getAdminClient();
+  const { data, error } = await admin.auth.admin.getUserByEmail(email);
+  if (error || !data?.user) throw new Error('User not found in Supabase');
+  return data.user.id;
+}
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -31,14 +51,8 @@ export async function GET(req: NextRequest) {
       ? authHeader.substring('Bearer '.length)
       : undefined;
 
-    if (!token) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Missing Authorization Bearer token' }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const supabase = getSupabaseClient(token);
+    // Prefer token; fallback to NextAuth session + service role
+    const supabase = token ? getSupabaseClient(token) : getAdminClient();
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
 
@@ -93,12 +107,9 @@ export async function POST(req: NextRequest) {
     const token = authHeader?.startsWith('Bearer ')
       ? authHeader.substring('Bearer '.length)
       : undefined;
-    if (!token) {
-      return new Response(JSON.stringify({ success: false, error: 'Missing Authorization Bearer token' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
-    }
-    const userId = await getUserIdFromToken(token);
+    const userId = token ? await getUserIdFromToken(token) : await getUserIdFromNextAuth();
     const body = await req.json();
-    const supabase = getSupabaseClient(token);
+    const supabase = token ? getSupabaseClient(token) : getAdminClient();
     const insert = {
       user_id: userId,
       name: body.name,
@@ -139,11 +150,8 @@ export async function PATCH(req: NextRequest) {
     const token = authHeader?.startsWith('Bearer ')
       ? authHeader.substring('Bearer '.length)
       : undefined;
-    if (!token) {
-      return new Response(JSON.stringify({ success: false, error: 'Missing Authorization Bearer token' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
-    }
     const body = await req.json();
-    const supabase = getSupabaseClient(token);
+    const supabase = token ? getSupabaseClient(token) : getAdminClient();
     const update: any = {};
     if (body.name !== undefined) update.name = body.name;
     if (body.category !== undefined) update.category = body.category;
@@ -187,10 +195,7 @@ export async function DELETE(req: NextRequest) {
     const token = authHeader?.startsWith('Bearer ')
       ? authHeader.substring('Bearer '.length)
       : undefined;
-    if (!token) {
-      return new Response(JSON.stringify({ success: false, error: 'Missing Authorization Bearer token' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
-    }
-    const supabase = getSupabaseClient(token);
+    const supabase = token ? getSupabaseClient(token) : getAdminClient();
     const { error } = await supabase.from('inventory_items').delete().eq('id', id);
     if (error) throw error;
     return new Response(JSON.stringify({ success: true, message: 'Deleted' }), { status: 200, headers: { 'Content-Type': 'application/json' } });
