@@ -147,18 +147,6 @@ export async function PATCH(req: NextRequest) {
     }
     const supabase = getSupabaseClient(token);
     const userId = await getUserIdFromToken(token);
-    // If using admin client, ensure we only update owning user's record
-    let userIdForFilter: string | undefined;
-    if (!token) {
-      try {
-        userIdForFilter = await getUserIdFromNextAuth();
-      } catch (e: any) {
-        return new Response(
-          JSON.stringify({ success: false, error: e?.message || 'Unauthorized' }),
-          { status: 401, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
-    }
     const update: any = {};
     if (body.name !== undefined) update.name = body.name;
     if (body.category !== undefined) update.category = body.category;

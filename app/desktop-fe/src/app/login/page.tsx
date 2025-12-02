@@ -23,6 +23,18 @@ export default function LoginPage() {
     }
   }, [authenticated, router]);
 
+  if (authenticated) {
+    return (
+      <div className="login">
+        <div className={styles.loginContainer}>
+          <div style={{ padding: 24, textAlign: 'center' }}>
+            <p>Redirecting...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     (async () => {
