@@ -1,3 +1,5 @@
+@use "../../scss/helpers/import" as *;
+
 .container {
   min-height: 100vh;
   background-color: #f8f9fb;
@@ -123,9 +125,10 @@
 }
 
 .main {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem 1.5rem;
+  // max-width: 1280px;
+  // margin: 0 auto;
+  // padding: 2rem 1.5rem;
+  @include centered ($max-width, 1.5rem);
 }
 
 .loading {

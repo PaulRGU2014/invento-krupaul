@@ -1,3 +1,5 @@
+@use "../../scss/helpers/import" as *;
+
 .container {
   display: flex;
   flex-direction: column;
@@ -224,6 +226,22 @@
 
         &.date {
           color: #6b7280;
+        }
+      }
+    }
+  }
+  @include responsive (md) {
+    table {
+      thead tr {
+        th {
+          font-size: 0.75rem;
+          padding: 0.5rem 0.25rem;
+        }
+      }
+      tbody tr {
+        td {
+          font-size: 0.75rem;
+          padding: 0.5rem 0.25rem;
         }
       }
     }
