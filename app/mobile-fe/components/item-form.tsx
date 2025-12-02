@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, TextInput, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { X } from 'lucide-react-native';
 import { InventoryItem } from '@/types/inventory';
 import { Picker } from '@react-native-picker/picker';
+import { Theme } from '@/constants/theme';
 
 interface ItemFormProps {
   item: InventoryItem | null;
@@ -35,15 +36,32 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
     }
   }, [item]);
 
+  const parsed = useMemo(() => ({
+    quantity: parseFloat(formData.quantity) || 0,
+    minStock: parseFloat(formData.minStock) || 0,
+    price: parseFloat(formData.price) || 0,
+  }), [formData.quantity, formData.minStock, formData.price]);
+
+  const isValid = useMemo(() => {
+    return (
+      formData.name.trim().length > 0 &&
+      formData.category.trim().length > 0 &&
+      formData.supplier.trim().length > 0 &&
+      parsed.quantity >= 0 &&
+      parsed.minStock >= 0 &&
+      parsed.price >= 0
+    );
+  }, [formData, parsed]);
+
   const handleSubmit = () => {
     const data = {
-      name: formData.name,
-      category: formData.category,
-      quantity: parseFloat(formData.quantity) || 0,
+      name: formData.name.trim(),
+      category: formData.category.trim(),
+      quantity: parsed.quantity,
       unit: formData.unit,
-      minStock: parseFloat(formData.minStock) || 0,
-      price: parseFloat(formData.price) || 0,
-      supplier: formData.supplier,
+      minStock: parsed.minStock,
+      price: parsed.price,
+      supplier: formData.supplier.trim(),
     };
 
     if (item) {
@@ -54,8 +72,8 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.card}>
+    <ScrollView style={[styles.container, { backgroundColor: Theme.background }]}>
+      <View style={[styles.card, { backgroundColor: Theme.cardBg, borderRadius: Theme.borderRadius }]}>
         <View style={styles.header}>
           <Text style={styles.title}>{item ? 'Edit Item' : 'Add New Item'}</Text>
           {item && (
@@ -99,7 +117,7 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
 
             <View style={styles.formGroupHalf}>
               <Text style={styles.label}>Unit *</Text>
-              <View style={styles.pickerWrapper}>
+              <View style={[styles.pickerWrapper, { backgroundColor: Theme.cardBg, borderColor: Theme.border }]}>
                 <Picker
                   selectedValue={formData.unit}
                   onValueChange={(value) => setFormData(prev => ({ ...prev, unit: value }))}
@@ -152,11 +170,11 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
 
           <View style={styles.formActions}>
             {item && (
-              <TouchableOpacity onPress={onCancel} style={styles.cancelButton}>
+              <TouchableOpacity onPress={onCancel} style={[styles.cancelButton, { borderColor: Theme.border, backgroundColor: Theme.cardBg }]}>
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
             )}
-            <TouchableOpacity onPress={handleSubmit} style={styles.submitButton}>
+            <TouchableOpacity onPress={handleSubmit} style={[styles.submitButton, !isValid && styles.submitDisabled]} disabled={!isValid}>
               <Text style={styles.submitButtonText}>
                 {item ? 'Update Item' : 'Add Item'}
               </Text>
@@ -165,9 +183,9 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
         </View>
 
         {!item && (
-          <View style={styles.tip}>
+          <View style={[styles.tip, { backgroundColor: Theme.primaryLight, borderColor: Theme.primaryLight }]}>
             <Text style={styles.tipText}>
-              <Text style={styles.tipBold}>Tip:</Text> Set the minimum stock level to get alerts 
+              <Text style={styles.tipBold}>Tip:</Text> Set the minimum stock level to get alerts
               when inventory runs low. This helps you reorder items before they run out.
             </Text>
           </View>
@@ -180,11 +198,11 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fb',
+    backgroundColor: Theme.background,
   },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: Theme.cardBg,
+    borderRadius: Theme.borderRadius,
     padding: 16,
     margin: 16,
     shadowColor: '#000',
@@ -229,14 +247,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderWidth: 1,
-    borderColor: '#d1d5db',
+    borderColor: Theme.border,
     borderRadius: 8,
     fontSize: 16,
-    backgroundColor: '#fff',
+    backgroundColor: Theme.cardBg,
   },
   pickerWrapper: {
     borderWidth: 1,
-    borderColor: '#d1d5db',
+    borderColor: Theme.border,
     borderRadius: 8,
     overflow: 'hidden',
   },
@@ -250,15 +268,15 @@ const styles = StyleSheet.create({
     marginTop: 8,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
+    borderTopColor: Theme.border,
   },
   cancelButton: {
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#d1d5db',
-    backgroundColor: '#fff',
+    borderColor: Theme.border,
+    backgroundColor: Theme.cardBg,
   },
   cancelButtonText: {
     color: '#374151',
@@ -268,7 +286,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
-    backgroundColor: '#007bff',
+    backgroundColor: Theme.primary,
+  },
+  submitDisabled: {
+    opacity: 0.6,
   },
   submitButtonText: {
     color: '#fff',
@@ -277,9 +298,9 @@ const styles = StyleSheet.create({
   tip: {
     marginTop: 16,
     padding: 12,
-    backgroundColor: '#eff6ff',
+    backgroundColor: Theme.primaryLight,
     borderWidth: 1,
-    borderColor: '#bfdbfe',
+    borderColor: Theme.primaryLight,
     borderRadius: 8,
   },
   tipText: {

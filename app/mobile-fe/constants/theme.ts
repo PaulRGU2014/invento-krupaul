@@ -1,41 +1,56 @@
 /**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
+ * Centralized theme tokens used across the mobile app.
+ * These values are chosen to match the desktop app's visual language.
  */
 
 import { Platform } from 'react-native';
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+/* Core brand tokens (match desktop) */
+const PRIMARY = '#007bff';
+const PRIMARY_LIGHT = '#eff6ff';
+const DANGER = '#dc2626';
+const LOW_STOCK_BG = '#fef2f2';
+const LOW_STOCK_BORDER = '#fecaca';
+const CARD_BG = '#ffffff';
+const BORDER = '#e5e7eb';
+const APP_BG = '#f8f9fb';
 
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
+    text: '#111827',
+    background: APP_BG,
+    tint: PRIMARY,
     icon: '#687076',
     tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
+    tabIconSelected: PRIMARY,
   },
   dark: {
     text: '#ECEDEE',
     background: '#151718',
-    tint: tintColorDark,
+    tint: '#ffffff',
     icon: '#9BA1A6',
     tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
+    tabIconSelected: '#ffffff',
   },
+};
+
+export const Theme = {
+  primary: PRIMARY,
+  primaryLight: PRIMARY_LIGHT,
+  danger: DANGER,
+  lowStockBg: LOW_STOCK_BG,
+  lowStockBorder: LOW_STOCK_BORDER,
+  cardBg: CARD_BG,
+  border: BORDER,
+  background: APP_BG,
+  borderRadius: 12,
 };
 
 export const Fonts = Platform.select({
   ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
     sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
     serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
     rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
     mono: 'ui-monospace',
   },
   default: {

@@ -1,7 +1,17 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import { Search, Edit2, Trash2, AlertTriangle } from 'lucide-react-native';
+import React, { useState, useMemo } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  TextInput,
+} from 'react-native';
+import { Edit2, Trash2, AlertTriangle } from 'lucide-react-native';
 import { InventoryItem } from '@/types/inventory';
+import { Picker } from '@react-native-picker/picker';
+import { Theme } from '@/constants/theme';
 
 interface InventoryListProps {
   items: InventoryItem[];
@@ -10,49 +20,94 @@ interface InventoryListProps {
 }
 
 export function InventoryList({ items, onEdit, onDelete }: InventoryListProps) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState<'all' | string>('all');
+  const [stockFilter, setStockFilter] = useState<'all' | 'low'>('all');
 
-  const categories = ['all', ...new Set(items.map(item => item.category))];
+  const categories = useMemo(() => {
+    const set = new Set(items.map(i => i.category));
+    return ['all', ...Array.from(set)];
+  }, [items]);
 
-  const filteredItems = items.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.supplier.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = categoryFilter === 'all' || item.category === categoryFilter;
-    
-    return matchesSearch && matchesCategory;
-  });
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return items.filter(item => {
+      if (q) {
+        const matches =
+          item.name.toLowerCase().includes(q) ||
+          (item.supplier || '').toLowerCase().includes(q);
+        if (!matches) return false;
+      }
+      if (category !== 'all' && item.category !== category) return false;
+      if (stockFilter === 'low' && item.quantity > item.minStock) return false;
+      return true;
+    });
+  }, [items, search, category, stockFilter]);
 
   return (
-    <ScrollView style={styles.container}>
-      {/* Search */}
-      <View style={styles.searchWrapper}>
-        <Search color="#9ca3af" size={20} style={styles.searchIcon} />
+    <ScrollView style={[styles.container, { backgroundColor: Theme.background }]}>
+      {/* Filters */}
+      <View style={styles.filterRow}>
         <TextInput
           style={styles.searchInput}
-          placeholder="Search items or suppliers..."
-          value={searchTerm}
-          onChangeText={setSearchTerm}
+          placeholder="Search items or supplier..."
+          value={search}
+          onChangeText={setSearch}
         />
+        <View style={styles.pickerWrapper}>
+          <Picker
+            selectedValue={category}
+            onValueChange={(val) => setCategory(val as any)}
+            style={styles.picker}
+          >
+            {categories.map(cat => (
+              <Picker.Item key={cat} label={cat === 'all' ? 'All Categories' : cat} value={cat} />
+            ))}
+          </Picker>
+        </View>
+      </View>
+
+      <View style={styles.filterRowSmall}>
+        <TouchableOpacity
+          onPress={() => setStockFilter(prev => (prev === 'all' ? 'low' : 'all'))}
+          style={[
+            styles.stockButton,
+            stockFilter === 'low' && { backgroundColor: Theme.lowStockBg, borderColor: Theme.lowStockBorder },
+          ]}
+        >
+          <Text style={[styles.stockButtonText, stockFilter === 'low' && { color: Theme.danger }]}>
+            {stockFilter === 'low' ? 'Showing Low Stock' : 'Show Low Stock'}
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {/* Items List */}
       <View style={styles.itemsList}>
-        {filteredItems.length === 0 ? (
+        {filtered.length === 0 ? (
           <Text style={styles.emptyState}>No items found</Text>
         ) : (
-          filteredItems.map(item => (
-            <View key={item.id} style={styles.itemCard}>
+          filtered.map(item => (
+            <View
+              key={item.id}
+              style={[
+                styles.itemCard,
+                item.quantity <= item.minStock && {
+                  backgroundColor: Theme.lowStockBg,
+                  borderWidth: 1,
+                  borderColor: Theme.lowStockBorder,
+                },
+              ]}
+            >
               <View style={styles.itemHeader}>
                 <View style={styles.itemTitleRow}>
                   {item.quantity <= item.minStock && (
-                    <AlertTriangle color="#dc2626" size={16} />
+                    <AlertTriangle color={Theme.danger} size={16} />
                   )}
                   <Text style={styles.itemName}>{item.name}</Text>
                 </View>
                 <View style={styles.actions}>
-                  <TouchableOpacity onPress={() => onEdit(item)} style={styles.editButton}>
-                    <Edit2 color="#007bff" size={18} />
+                  <TouchableOpacity onPress={() => onEdit(item)} style={[styles.iconButton, { backgroundColor: Theme.primaryLight }]}>
+                    <Edit2 color={Theme.primary} size={18} />
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() => {
@@ -65,13 +120,13 @@ export function InventoryList({ items, onEdit, onDelete }: InventoryListProps) {
                         ]
                       );
                     }}
-                    style={styles.deleteButton}
+                    style={[styles.iconButton, { backgroundColor: Theme.lowStockBg }]}
                   >
-                    <Trash2 color="#dc2626" size={18} />
+                    <Trash2 color={Theme.danger} size={18} />
                   </TouchableOpacity>
                 </View>
               </View>
-              
+
               <View style={styles.itemDetails}>
                 <View style={styles.itemRow}>
                   <Text style={styles.itemLabel}>Category:</Text>
@@ -112,12 +167,12 @@ export function InventoryList({ items, onEdit, onDelete }: InventoryListProps) {
       <View style={styles.summary}>
         <View style={styles.summaryItem}>
           <Text style={styles.summaryLabel}>Total Items</Text>
-          <Text style={styles.summaryValue}>{filteredItems.length}</Text>
+          <Text style={styles.summaryValue}>{filtered.length}</Text>
         </View>
         <View style={styles.summaryItem}>
           <Text style={styles.summaryLabel}>Total Value</Text>
           <Text style={styles.summaryValue}>
-            ${filteredItems.reduce((sum, item) => sum + (item.quantity * item.price), 0).toFixed(2)}
+            ${filtered.reduce((sum, item) => sum + (item.quantity * item.price), 0).toFixed(2)}
           </Text>
         </View>
       </View>
@@ -128,27 +183,37 @@ export function InventoryList({ items, onEdit, onDelete }: InventoryListProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fb',
+    backgroundColor: Theme.background,
   },
-  searchWrapper: {
-    position: 'relative',
+  filterRow: {
     padding: 16,
+    flexDirection: 'row',
+    gap: 12,
   },
-  searchIcon: {
-    position: 'absolute',
-    left: 28,
-    top: 28,
-    zIndex: 1,
+  filterRowSmall: {
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+    alignItems: 'flex-start',
   },
   searchInput: {
-    paddingLeft: 48,
-    paddingRight: 16,
-    paddingVertical: 12,
+    flex: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     borderWidth: 1,
-    borderColor: '#d1d5db',
+    borderColor: Theme.border,
     borderRadius: 8,
-    backgroundColor: '#fff',
-    fontSize: 16,
+    backgroundColor: Theme.cardBg,
+  },
+  pickerWrapper: {
+    width: 160,
+    borderWidth: 1,
+    borderColor: Theme.border,
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: Theme.cardBg,
+  },
+  picker: {
+    height: 44,
   },
   itemsList: {
     padding: 16,
@@ -160,8 +225,8 @@ const styles = StyleSheet.create({
     color: '#6b7280',
   },
   itemCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: Theme.cardBg,
+    borderRadius: Theme.borderRadius,
     padding: 16,
     shadowColor: '#000',
     shadowOpacity: 0.05,
@@ -192,15 +257,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
   },
-  editButton: {
+  iconButton: {
     padding: 8,
     borderRadius: 8,
-    backgroundColor: '#eff6ff',
-  },
-  deleteButton: {
-    padding: 8,
-    borderRadius: 8,
-    backgroundColor: '#fef2f2',
   },
   itemDetails: {
     gap: 8,
@@ -220,12 +279,24 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   lowStock: {
-    color: '#dc2626',
+    color: Theme.danger,
     fontWeight: '600',
   },
+  stockButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Theme.border,
+    backgroundColor: Theme.cardBg,
+  },
+  stockButtonText: {
+    color: '#374151',
+    fontWeight: '500',
+  },
   summary: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: Theme.cardBg,
+    borderRadius: Theme.borderRadius,
     padding: 16,
     marginHorizontal: 16,
     marginBottom: 16,

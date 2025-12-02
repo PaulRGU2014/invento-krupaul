@@ -15,8 +15,7 @@ import GoogleLogo from "@/components/google-logo";
 // import FacebookLogo from "@/components/facebook-logo";
 import Logo from "@/components/logo";
 // import { useFacebookAuth } from "@/hooks/use-facebook-auth";
-import { useGoogleAuth } from "@/hooks/use-google-auth";
-import { useGoogleAuthWeb } from "@/hooks/use-google-auth-web";
+import { supabase } from "@/lib/supabase-client";
 
 export default function LoginScreen() {
   const { login, loading, error } = useAuth();
@@ -24,26 +23,30 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const { signIn: googleSignIn } = useGoogleAuth();
-  const { signIn: googleSignInWeb, isReady: isWebReady } = useGoogleAuthWeb();
+  const isWeb = Platform.OS === 'web';
   // const { promptAsync: promptFacebookAsync } = useFacebookAuth();
 
   const handleGoogleSignIn = async () => {
     try {
-      if (Platform.OS === 'web') {
-        const result = await googleSignInWeb();
-        if (result) {
-          Alert.alert(
-            "Google Sign-In Success", 
-            `Welcome ${result.user.name}!\n\nEmail: ${result.user.email}\n\nNote: Backend integration needed to complete login.`
-          );
-        }
+      const redirectTo = isWeb && typeof window !== 'undefined' 
+        ? `${window.location.origin}/redirect`
+        : undefined;
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo,
+        },
+      });
+
+      if (error) throw error;
+
+      if (isWeb) {
+        // On web, Supabase will redirect. If popup flow is used, you can check session after.
+        Alert.alert("Redirecting", "Completing Google sign-in...");
       } else {
-        const userInfo = await googleSignIn();
-        Alert.alert(
-          "Google Sign-In", 
-          `Welcome ${userInfo?.data?.user?.name || 'User'}!\n\nNote: Backend integration needed to complete login.`
-        );
+        // For native, depending on configuration, a browser may open.
+        Alert.alert("Google Sign-In", "Follow the browser flow to complete sign-in.");
       }
     } catch (error: any) {
       Alert.alert("Google Sign-In Failed", error.message || "Unable to sign in with Google");
@@ -127,7 +130,6 @@ export default function LoginScreen() {
           <TouchableOpacity
             style={styles.socialButton}
             onPress={handleGoogleSignIn}
-            disabled={Platform.OS === 'web' && !isWebReady}
           >
             <View style={styles.socialContent}>
               <GoogleLogo width={20} height={20} />

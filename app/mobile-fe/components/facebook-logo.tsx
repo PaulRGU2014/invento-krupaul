@@ -12,7 +12,7 @@ export default function FacebookLogo({ width = 24, height = 24, ...props }: Prop
       {...props}
     >
       <Defs>
-        <ClipPath clipPathUnits="userSpaceOnUse" id="clipPath25">
+        <ClipPath id="clipPath25">
           <Path d="M 0,700 H 700 V 0 H 0 Z" />
         </ClipPath>
       </Defs>

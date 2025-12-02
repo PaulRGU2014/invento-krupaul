@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Package, AlertTriangle, DollarSign, TrendingUp } from 'lucide-react-native';
 import { InventoryItem } from '@/types/inventory';
+import { Theme } from '@/constants/theme';
 
 interface DashboardProps {
   items: InventoryItem[];
@@ -33,7 +34,7 @@ export function Dashboard({ items }: DashboardProps) {
               <Text style={styles.statValue}>{totalItems}</Text>
             </View>
             <View style={[styles.statIcon, styles.blueIcon]}>
-              <Package color="#007bff" size={24} />
+              <Package color={Theme.primary} size={24} />
             </View>
           </View>
         </View>
@@ -45,7 +46,7 @@ export function Dashboard({ items }: DashboardProps) {
               <Text style={styles.statValue}>{lowStockItems.length}</Text>
             </View>
             <View style={[styles.statIcon, styles.redIcon]}>
-              <AlertTriangle color="#dc2626" size={24} />
+              <AlertTriangle color={Theme.danger} size={24} />
             </View>
           </View>
         </View>
@@ -76,23 +77,23 @@ export function Dashboard({ items }: DashboardProps) {
       </View>
 
       {/* Low Stock Alerts */}
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: Theme.cardBg, borderRadius: Theme.borderRadius }]}>
         <Text style={styles.cardTitle}>Low Stock Alerts</Text>
         {lowStockItems.length === 0 ? (
           <Text style={styles.emptyState}>No items running low on stock</Text>
         ) : (
           <View style={styles.alertList}>
             {lowStockItems.map(item => (
-              <View key={item.id} style={styles.alertItem}>
+              <View key={item.id} style={[styles.alertItem, { backgroundColor: Theme.lowStockBg, borderColor: Theme.lowStockBorder }]}>
                 <View style={styles.alertLeft}>
-                  <AlertTriangle color="#dc2626" size={20} />
+                  <AlertTriangle color={Theme.danger} size={20} />
                   <View style={styles.alertInfo}>
                     <Text style={styles.alertName}>{item.name}</Text>
                     <Text style={styles.alertCategory}>{item.category}</Text>
                   </View>
                 </View>
                 <View style={styles.alertRight}>
-                  <Text style={styles.alertQuantity}>{item.quantity} {item.unit}</Text>
+                  <Text style={[styles.alertQuantity, { color: Theme.danger }]}>{item.quantity} {item.unit}</Text>
                   <Text style={styles.alertMin}>Min: {item.minStock}</Text>
                 </View>
               </View>
@@ -102,7 +103,7 @@ export function Dashboard({ items }: DashboardProps) {
       </View>
 
       {/* Category Breakdown */}
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: Theme.cardBg, borderRadius: Theme.borderRadius }]}>
         <Text style={styles.cardTitle}>Inventory by Category</Text>
         <View style={styles.categoryList}>
           {categoryData.map(cat => (
@@ -115,7 +116,7 @@ export function Dashboard({ items }: DashboardProps) {
                 <View
                   style={[
                     styles.progressFill,
-                    { width: `${(cat.value / totalValue) * 100}%` }
+                    { width: `${totalValue > 0 ? (cat.value / totalValue) * 100 : 0}%` }
                   ]}
                 />
               </View>
@@ -131,7 +132,7 @@ export function Dashboard({ items }: DashboardProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fb',
+    backgroundColor: Theme.background,
   },
   statsGrid: {
     flexDirection: 'row',
@@ -140,8 +141,8 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   statCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: Theme.cardBg,
+    borderRadius: Theme.borderRadius,
     padding: 16,
     shadowColor: '#000',
     shadowOpacity: 0.05,
@@ -173,10 +174,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   blueIcon: {
-    backgroundColor: '#dbeafe',
+    backgroundColor: Theme.primaryLight,
   },
   redIcon: {
-    backgroundColor: '#fee2e2',
+    backgroundColor: Theme.lowStockBg,
   },
   greenIcon: {
     backgroundColor: '#d1fae5',
@@ -185,8 +186,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#e9d5ff',
   },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: Theme.cardBg,
+    borderRadius: Theme.borderRadius,
     padding: 16,
     marginHorizontal: 16,
     marginBottom: 16,
@@ -214,10 +215,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 12,
-    backgroundColor: '#fef2f2',
+    backgroundColor: Theme.lowStockBg,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#fecaca',
+    borderColor: Theme.lowStockBorder,
   },
   alertLeft: {
     flexDirection: 'row',
@@ -241,7 +242,7 @@ const styles = StyleSheet.create({
   },
   alertQuantity: {
     fontWeight: '600',
-    color: '#dc2626',
+    color: Theme.danger,
   },
   alertMin: {
     fontSize: 12,
@@ -269,12 +270,12 @@ const styles = StyleSheet.create({
   progressBar: {
     width: '100%',
     height: 8,
-    backgroundColor: '#e5e7eb',
+    backgroundColor: Theme.border,
     borderRadius: 999,
   },
   progressFill: {
     height: 8,
-    backgroundColor: '#007bff',
+    backgroundColor: Theme.primary,
     borderRadius: 999,
   },
   categoryCount: {
