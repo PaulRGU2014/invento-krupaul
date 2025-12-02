@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./page.module.scss";
-import Logo from "@/components/logo";
-import GoogleLogo from "@/components/google-logo";
-// import FacebookLogo from "@/components/facebook-logo";
+import Logo from "@/components/logos/logo";
+import GoogleLogo from "@/components/logos/google-logo";
+// import FacebookLogo from "@/components/logos/facebook-logo";
 import { HiOutlineMail, HiOutlineLockClosed  } from "react-icons/hi";
-import { useSupabaseSession, useSupabase } from "@/components/supabase-provider";
+import { useSupabaseSession, useSupabase } from "@/components/providers/supabase-provider";
 
 export default function LoginPage() {
   const router = useRouter();

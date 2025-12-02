@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { useSupabaseSession, useSupabase } from "@/components/supabase-provider";
+import { useSupabaseSession, useSupabase } from "@/components/providers/supabase-provider";
 
 interface Props {
   children: React.ReactNode;

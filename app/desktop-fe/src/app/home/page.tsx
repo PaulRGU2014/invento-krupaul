@@ -2,15 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSupabaseSession, useSupabase } from "@/components/supabase-provider";
+import { useSupabaseSession, useSupabase } from "@/components/providers/supabase-provider";
 import { Package, LogOut, User } from "lucide-react";
 import { InventoryItem } from "@/types/inventory";
 import { fetchInventory, createInventoryItem, updateInventoryItem, deleteInventoryItem } from "@/lib/inventory-api";
-import { Dashboard } from "@/components/dashboard";
-import { InventoryList } from "@/components/inventory-list";
-import { ItemForm } from "@/components/item-form";
+import { Dashboard } from "@/components/dashboard/dashboard";
+import { InventoryList } from "@/components/inventory/inventory-list";
+import { ItemForm } from "@/components/inventory/item-form";
 import styles from "./page.module.scss";
-import { EmailConfirmationGuard } from "@/components/email-confirmation-guard";
+import { EmailConfirmationGuard } from "@/components/guards/email-confirmation-guard";
 
 export default function HomePage() {
   const router = useRouter();

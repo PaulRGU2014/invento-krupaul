@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Noto_Sans_Thai_Looped } from "next/font/google";
 import "@scss/global.scss";
-import { SupabaseProvider } from "@/components/supabase-provider";
-import { AuthProvider } from "@/components/auth-provider";
+import { SupabaseProvider } from "@/components/providers/supabase-provider";
+import { AuthProvider } from "@/components/providers/auth-provider";
 
 const inter = Inter({
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],

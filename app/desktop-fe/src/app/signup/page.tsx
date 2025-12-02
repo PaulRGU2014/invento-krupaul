@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSupabase } from "@/components/supabase-provider";
+import { useSupabase } from "@/components/providers/supabase-provider";
 import styles from "./page.module.scss";
-import Logo from "@/components/logo";
-import GoogleLogo from "@/components/google-logo";
-// import FacebookLogo from "@/components/facebook-logo";
+import Logo from "@/components/logos/logo";
+import GoogleLogo from "@/components/logos/google-logo";
+// import FacebookLogo from "@/components/logos/facebook-logo";
 import { HiOutlineMail, HiOutlineLockClosed, HiOutlineUser } from "react-icons/hi";
 
 export default function SignupPage() {
