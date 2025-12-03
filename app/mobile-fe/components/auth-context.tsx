@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode, useCa
 import * as SecureStore from 'expo-secure-store';
 import axios from 'axios';
 import { supabase } from '@/lib/supabase-client';
+import { useRouter } from 'expo-router';
 
 type User = {
   id?: string;
@@ -54,6 +55,7 @@ async function deleteToken() {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const router = useRouter();
   const [session, setSession] = useState<any | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -183,6 +185,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(null);
       setToken(null);
       setUser(null);
+      // Navigate to login so user can't go back to protected screens
+      router.replace('/login');
     }
   };
 
