@@ -1,0 +1,200 @@
+@use "../../../scss/helpers/import" as *;
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  h6{
+    margin: 0 0 10px 0;
+    font-weight: 700;
+  }
+  p {
+    color: $gray-700;
+    margin: 0;
+  }
+}
+
+.tabs {
+  background-color: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+
+  .tabHeader {
+    display: flex;
+    flex-wrap: wrap;
+    border-bottom: 1px solid #e5e7eb;
+    background-color: #f9fafb;
+  }
+
+  .tabButton {
+    padding: 0.75rem 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #374151;
+    font-weight: 500;
+    transition: background-color 0.15s, color 0.15s;
+
+    &.active {
+      color: #111827;
+      background-color: #fff;
+      border-bottom: 2px solid #007bff;
+    }
+
+    &:hover {
+      background-color: #eef2f7;
+    }
+  }
+}
+
+.card {
+  background-color: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+  padding: 1.5rem;
+
+  .cardTitle {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 1rem;
+  }
+}
+
+.gridGap {
+  display: grid;
+  gap: 1rem;
+}
+
+.label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.input,
+.select {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  outline: none;
+
+  &:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  }
+}
+
+.checkboxRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.button {
+  padding: 0.5rem 1.25rem;
+  color: #fff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  &:hover {
+    background-color: #0056b3;
+  }
+}
+
+.notice {
+  padding: 0.75rem 1rem;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 0.5rem;
+  color: #1e3a8a;
+}
+
+.sectionGridTwo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.providerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.providerLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.providerLogo {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.toggleLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background-color: #e5e7eb;
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+.toggleKnob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background-color: #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease;
+}
+
+.toggleOn {
+  background-color: #007bff;
+}
+
+.toggleOn .toggleKnob {
+  transform: translateX(20px);
+}
+

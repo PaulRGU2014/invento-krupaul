@@ -7,16 +7,18 @@ import { Package, LogOut, User } from "lucide-react";
 import { InventoryItem } from "@/types/inventory";
 import { fetchInventory, createInventoryItem, updateInventoryItem, deleteInventoryItem } from "@/lib/inventory-api";
 import { Dashboard } from "@/components/dashboard/dashboard";
+import SettingsForm from "@/components/dashboard/account-settings/SettingsForm";
 import { InventoryList } from "@/components/inventory/inventory-list";
 import { ItemForm } from "@/components/inventory/item-form";
 import styles from "./page.module.scss";
 import { EmailConfirmationGuard } from "@/components/guards/email-confirmation-guard";
+import { UserProfileProvider, useUserProfile } from "@/components/providers/user-profile-context";
 
 export default function HomePage() {
   const router = useRouter();
   const { session, authenticated, loading } = useSupabaseSession();
   const { supabase } = useSupabase();
-  const [activeView, setActiveView] = useState<'dashboard' | 'inventory' | 'add'>('dashboard');
+  const [activeView, setActiveView] = useState<'dashboard' | 'inventory' | 'add' | 'settings'>('dashboard');
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [loadingItems, setLoadingItems] = useState(false);
@@ -108,8 +110,12 @@ export default function HomePage() {
     );
   }
 
+  const displayName = (session?.user?.user_metadata as any)?.full_name || "";
+  const email = session?.user?.email || "";
+
   return (
     <EmailConfirmationGuard>
+    <UserProfileProvider initialName={displayName} initialEmail={email}>
     <div className={styles.container}>
       {/* Header */}
       <header className={styles.header}>
@@ -126,7 +132,7 @@ export default function HomePage() {
           <div className={styles.userSection}>
             <div className={styles.userInfo}>
               <User size={20} />
-              <span>{(session?.user?.user_metadata as any)?.full_name || session?.user?.email}</span>
+              <HeaderUserNameFallback sessionName={displayName} sessionEmail={email} />
             </div>
             <button onClick={handleLogout} className={styles.logoutButton} title="Logout">
               <LogOut size={20} />
@@ -162,6 +168,15 @@ export default function HomePage() {
             className={`${styles.navButton} ${activeView === 'add' ? styles.active : ''}`}
           >
             {editingItem ? 'Edit Item' : 'Add Item'}
+          </button>          
+          <button
+            onClick={() => {
+              setActiveView('settings');
+              setEditingItem(null);
+            }}
+            className={`${styles.navButton} ${activeView === 'settings' ? styles.active : ''}`}
+          >
+            Settings
           </button>
         </div>
       </nav>
@@ -169,6 +184,7 @@ export default function HomePage() {
       {/* Main Content */}
       <main className={styles.main}>
         {activeView === 'dashboard' && <Dashboard items={items} />}
+        {activeView === 'settings' && <SettingsForm />}
         {activeView === 'inventory' && (
           <InventoryList
             items={items}
@@ -185,6 +201,13 @@ export default function HomePage() {
         )}
       </main>
     </div>
+    </UserProfileProvider>
     </EmailConfirmationGuard>
   );
+}
+
+function HeaderUserNameFallback({ sessionName, sessionEmail }: { sessionName: string; sessionEmail: string }) {
+  const { profile } = useUserProfile();
+  const nameToShow = profile.name || sessionName || sessionEmail;
+  return <span>{nameToShow}</span>;
 }
