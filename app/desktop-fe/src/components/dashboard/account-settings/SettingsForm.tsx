@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 // Supabase hooks already imported below in this file
 import styles from "./account-settings.module.scss";
 import { useUserProfile } from "@/components/providers/user-profile-context";
@@ -22,10 +22,19 @@ type Preferences = {
   notifications: boolean;
 };
 
+type TabId = "profile" | "connected" | "security" | "preferences";
+type Tab = { id: TabId; label: string };
+
 export default function SettingsForm() {
   const { profile: ctxProfile, setProfile: setCtxProfile } = useUserProfile();
   const [profile, setProfile] = useState<Profile>({ name: ctxProfile.name || "", email: ctxProfile.email || "" });
-  const [activeTab, setActiveTab] = useState<'profile' | 'connected' | 'security' | 'preferences'>('profile');
+  const tabs: Tab[] = [
+    { id: "profile", label: "Profile" },
+    { id: "connected", label: "Connected Accounts" },
+    { id: "security", label: "Security" },
+    { id: "preferences", label: "Preferences" },
+  ];
+  const [activeTab, setActiveTab] = useState<TabId>("profile");
   // Using existing Supabase session and client declarations in this component
   const { session } = useSupabaseSession();
   const { supabase } = useSupabase();
@@ -114,15 +123,22 @@ export default function SettingsForm() {
         <p>Manage your account settings and preferences</p>
       </div>
       <div className={styles.tabs}>
+        <div className={styles.tabSelectWrapper}>
+          <select
+            className={styles.tabSelect}
+            value={activeTab}
+            onChange={(e) => setActiveTab(e.target.value as TabId)}
+            aria-label="Choose settings section"
+          >
+            {tabs.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.label}
+              </option>
+            ))}
+          </select>
+        </div>
         <div className={styles.tabHeader}>
-          {(
-            [
-              { id: "profile", label: "Profile" },
-              { id: "connected", label: "Connected Accounts" },
-              { id: "security", label: "Security" },
-              { id: "preferences", label: "Preferences" },
-            ] as const
-          ).map((t) => (
+          {tabs.map((t) => (
             <button
               key={t.id}
               className={`${styles.tabButton} ${activeTab === t.id ? styles.active : ""}`}
@@ -355,9 +371,9 @@ function ConnectedGoogleRow({ session, supabase, onStatus }: { session: any; sup
         <button className={styles.button} type="button" onClick={disconnectGoogle} disabled={!isConnected}>
           Disconnect
         </button>
-        <button className={styles.button} type="button" onClick={async () => { try { await supabase.auth.refreshSession(); onStatus("Session refreshed."); } catch { onStatus("Failed to refresh session."); } }}>
+        {/* <button className={styles.button} type="button" onClick={async () => { try { await supabase.auth.refreshSession(); onStatus("Session refreshed."); } catch { onStatus("Failed to refresh session."); } }}>
           Refresh
-        </button>
+        </button> */}
       </div>
     </div>
   );
