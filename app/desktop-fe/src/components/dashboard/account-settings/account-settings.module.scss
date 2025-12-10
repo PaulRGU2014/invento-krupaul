@@ -219,12 +219,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 1rem;
 }
 
 .toggleLabel {
   font-size: 0.875rem;
   font-weight: 500;
   color: #374151;
+}
+
+.toggleDescription {
+  margin: 0.2rem 0 0;
+  font-size: 0.8125rem;
+  color: #6b7280;
 }
 
 .toggle {
@@ -254,5 +261,24 @@
 
 .toggleOn .toggleKnob {
   transform: translateX(20px);
+}
+
+.buttonSecondary {
+  padding: 0.35rem 0.9rem;
+  color: #111827;
+  background-color: #eef2f7;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  &:hover:not(:disabled) {
+    background-color: #e5e7eb;
+  }
 }
 

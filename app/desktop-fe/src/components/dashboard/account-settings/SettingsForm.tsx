@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 // Supabase hooks already imported below in this file
 import styles from "./account-settings.module.scss";
 import { useUserProfile } from "@/components/providers/user-profile-context";
@@ -19,25 +19,45 @@ type Security = {
 
 type Preferences = {
   theme: "system" | "light" | "dark";
-  notifications: boolean;
 };
 
-type TabId = "profile" | "connected" | "security" | "preferences";
+type NotificationPreferences = {
+  enabled: boolean;
+  browserPush: boolean;
+  email: boolean;
+  sms: boolean;
+  productUpdates: boolean;
+  lowStock: boolean;
+  frequency: "immediate" | "hourly" | "daily" | "weekly";
+  webPermission?: NotificationPermission;
+};
+
+type TabId = "profile" | "connected" | "security" | "preferences" | "notifications";
 type Tab = { id: TabId; label: string };
 
 export default function SettingsForm() {
   const { profile: ctxProfile, setProfile: setCtxProfile } = useUserProfile();
-  const [profile, setProfile] = useState<Profile>({ name: ctxProfile.name || "", email: ctxProfile.email || "" });
+  // Supabase session first so state initializers can consume it safely
+  const { session } = useSupabaseSession();
+  const { supabase } = useSupabase();
+  const getProfileDefaults = (user: any): Profile => {
+    const fullName = user?.user_metadata?.full_name;
+    const email = user?.email;
+    return {
+      name: (fullName as string) || ctxProfile.name || "",
+      email: (email as string) || ctxProfile.email || "",
+    };
+  };
+
+  const [profile, setProfile] = useState<Profile>(() => getProfileDefaults(session?.user));
   const tabs: Tab[] = [
     { id: "profile", label: "Profile" },
     { id: "connected", label: "Connected Accounts" },
     { id: "security", label: "Security" },
     { id: "preferences", label: "Preferences" },
+    { id: "notifications", label: "Notifications" },
   ];
   const [activeTab, setActiveTab] = useState<TabId>("profile");
-  // Using existing Supabase session and client declarations in this component
-  const { session } = useSupabaseSession();
-  const { supabase } = useSupabase();
   const [security, setSecurity] = useState<Security>({
     currentPassword: "",
     newPassword: "",
@@ -45,10 +65,56 @@ export default function SettingsForm() {
   });
   const [preferences, setPreferences] = useState<Preferences>({
     theme: "system",
-    notifications: true,
   });
+  const frequencyOptions = useMemo(() => ([
+    { value: "immediate", label: "Immediate" },
+    { value: "hourly", label: "Hourly digest" },
+    { value: "daily", label: "Daily digest" },
+    { value: "weekly", label: "Weekly digest" },
+  ] as const), []);
+  const notificationDefaults: NotificationPreferences = {
+    enabled: true,
+    browserPush: true,
+    email: true,
+    sms: false,
+    productUpdates: true,
+    lowStock: true,
+    frequency: "immediate",
+    webPermission: undefined,
+  };
+
+  const deriveNotificationPrefs = (user: any): NotificationPreferences => {
+    const stored = user?.user_metadata?.notification_prefs;
+    const freq = stored?.frequency;
+    const allowedFreq = new Set(frequencyOptions.map((f) => f.value));
+    const isValidFreq = freq && allowedFreq.has(freq);
+    return {
+      ...notificationDefaults,
+      ...(typeof stored === "object" && stored ? stored : {}),
+      frequency: isValidFreq ? freq : notificationDefaults.frequency,
+    };
+  };
+
+  const [notificationPrefs, setNotificationPrefs] = useState<NotificationPreferences>(() => deriveNotificationPrefs(session?.user));
+  const [notificationDirty, setNotificationDirty] = useState(false);
+  const lowStockNotifyRef = useRef(false);
+
+  useEffect(() => {
+    setNotificationPrefs(deriveNotificationPrefs(session?.user));
+    setNotificationDirty(false);
+    setProfile(getProfileDefaults(session?.user));
+    setEmailLogin((prev) => ({ ...prev, email: session?.user?.email || prev.email }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.user?.id]);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [emailLogin, setEmailLogin] = useState({ email: session?.user?.email || ctxProfile.email || "", password: "", confirmPassword: "" });
+  const [linkingEmail, setLinkingEmail] = useState(false);
+  const identities = Array.isArray(session?.user?.identities) ? session.user.identities : [];
+  const providers = Array.isArray(session?.user?.app_metadata?.providers) ? session?.user?.app_metadata?.providers : [];
+  const hasProvider = (name: string) => identities.some((id: any) => id?.provider === name) || providers.includes(name);
+  const isEmailConnected = hasProvider("email");
+  const isFacebookConnected = hasProvider("facebook");
 
   async function handleSaveProfile(e: React.FormEvent) {
     e.preventDefault();
@@ -107,6 +173,101 @@ export default function SettingsForm() {
       setMessage("Failed to save preferences");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleSaveNotifications(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setMessage(null);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: { notification_prefs: notificationPrefs },
+      });
+      if (error) throw error;
+      try {
+        await supabase.auth.refreshSession();
+      } catch {}
+      setMessage("Notification settings saved");
+      setNotificationDirty(false);
+    } catch (err) {
+      setMessage("Failed to save notifications");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const updateNotificationPref = <K extends keyof NotificationPreferences>(key: K, value: NotificationPreferences[K]) => {
+    setNotificationPrefs((prev) => ({ ...prev, [key]: value }));
+    setNotificationDirty(true);
+  };
+
+  const requestWebPermission = async () => {
+    const hasNotificationSupport = typeof window !== "undefined" && typeof Notification !== "undefined";
+    if (!hasNotificationSupport) {
+      setMessage("Browser notifications not supported here.");
+      return;
+    }
+    try {
+      const result = await Notification.requestPermission();
+      updateNotificationPref("webPermission", result);
+      if (result === "granted") {
+        setMessage("Browser notifications enabled.");
+      } else if (result === "denied") {
+        setMessage("Browser notifications blocked by the browser.");
+      } else {
+        setMessage("Browser notification permission dismissed.");
+      }
+    } catch (err: any) {
+      setMessage(err?.message || "Failed to request notification permission.");
+    }
+  };
+
+  useEffect(() => {
+    const hasNotificationSupport = typeof window !== "undefined" && typeof Notification !== "undefined";
+    const shouldNotify =
+      notificationPrefs.enabled &&
+      notificationPrefs.browserPush &&
+      notificationPrefs.lowStock &&
+      notificationPrefs.webPermission === "granted";
+    if (!shouldNotify) return;
+    if (!hasNotificationSupport) return;
+    if (Notification.permission !== "granted") return;
+    if (lowStockNotifyRef.current) return;
+    try {
+      // Avoid spamming: one per session/page load
+      new Notification("Low stock alert", { body: "Some items are low on stock. Review inventory." });
+      lowStockNotifyRef.current = true;
+    } catch {
+      // Swallow errors to avoid UI noise
+    }
+  }, [notificationPrefs.enabled, notificationPrefs.browserPush, notificationPrefs.lowStock, notificationPrefs.webPermission]);
+
+
+  async function handleLinkEmailLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setLinkingEmail(true);
+    setMessage(null);
+    if (emailLogin.password !== emailLogin.confirmPassword) {
+      setMessage("Passwords do not match");
+      setLinkingEmail(false);
+      return;
+    }
+    try {
+      const { error } = await supabase.auth.updateUser({
+        email: emailLogin.email,
+        password: emailLogin.password,
+      });
+      if (error) throw error;
+      try {
+        await supabase.auth.refreshSession();
+      } catch {}
+      setMessage(isEmailConnected ? "Login updated" : "Email login added");
+      setEmailLogin((prev) => ({ ...prev, password: "", confirmPassword: "" }));
+    } catch (err) {
+      setMessage("Failed to update email login");
+    } finally {
+      setLinkingEmail(false);
     }
   }
 
@@ -207,11 +368,57 @@ export default function SettingsForm() {
               <p>Manage external login providers linked to your account.</p>
               <div className={styles.gridGap}>
                 <ConnectedGoogleRow session={session} supabase={supabase} onStatus={(msg) => setMessage(msg)} />
+                <div className={styles.gridGap}>
+                  <label className={styles.label}>Email &amp; Password</label>
+                  <p>Set up or update a password login for this account.</p>
+                  <p style={{ margin: 0, color: '#374151' }}>
+                    Status: {isEmailConnected ? 'Connected' : 'Not connected'}
+                  </p>
+                  <form onSubmit={handleLinkEmailLogin} className={styles.gridGap}>
+                    <div>
+                      <label className={styles.label}>Email</label>
+                      <input
+                        className={styles.input}
+                        type="email"
+                        value={emailLogin.email}
+                        onChange={(e) => setEmailLogin({ ...emailLogin, email: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className={styles.label}>Password</label>
+                      <input
+                        className={styles.input}
+                        type="password"
+                        value={emailLogin.password}
+                        onChange={(e) => setEmailLogin({ ...emailLogin, password: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className={styles.label}>Confirm Password</label>
+                      <input
+                        className={styles.input}
+                        type="password"
+                        value={emailLogin.confirmPassword}
+                        onChange={(e) => setEmailLogin({ ...emailLogin, confirmPassword: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div className={styles.actions}>
+                      <button className={styles.button} type="submit" disabled={linkingEmail}>
+                        {linkingEmail ? "Saving…" : isEmailConnected ? "Update login" : "Add email login"}
+                      </button>
+                    </div>
+                  </form>
+                </div>
                 <div>
                   <label className={styles.label}>Facebook</label>
                   <div className={styles.actions}>
                     <button className={styles.button} type="button" disabled>Connect</button>
-                    <button className={styles.button} type="button" disabled>Disconnect</button>
+                    {isFacebookConnected && (
+                      <button className={styles.button} type="button" disabled>Disconnect</button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -288,19 +495,97 @@ export default function SettingsForm() {
                   <option value="dark">Dark</option>
                 </select>
               </div>
-              <label className={styles.checkboxRow}>
-                <input
-                  type="checkbox"
-                  checked={preferences.notifications}
-                  onChange={(e) =>
-                    setPreferences({ ...preferences, notifications: e.target.checked })
-                  }
-                />
-                <span>Enable notifications</span>
-              </label>
               <div className={styles.actions}>
                 <button className={styles.button} type="submit" disabled={saving}>
                   {saving ? "Saving…" : "Save Preferences"}
+                </button>
+              </div>
+            </form>
+          </section>
+        )}
+
+        {/* Notifications Section */}
+        {activeTab === 'notifications' && (
+          <section className={styles.card}>
+            <h2 className={styles.cardTitle}>Notifications</h2>
+            <form onSubmit={handleSaveNotifications} className={styles.gridGap}>
+              <p style={{ margin: 0, color: '#4b5563' }}>
+                Choose how you want to be notified. We recommend keeping at least one channel on.
+              </p>
+              {notificationDirty && (
+                <p style={{ margin: 0, color: '#b45309', fontSize: '0.875rem' }}>
+                  You have unsaved changes.
+                </p>
+              )}
+              <div className={styles.gridGap}>
+                <NotificationToggleRow
+                  label="Enable notifications"
+                  description="Master switch for all notifications."
+                  value={notificationPrefs.enabled}
+                  onToggle={(next) => updateNotificationPref("enabled", next)}
+                />
+                <NotificationToggleRow
+                  label="Web notifications"
+                  description="Show alerts in your browser."
+                  value={notificationPrefs.browserPush}
+                  disabled={!notificationPrefs.enabled}
+                  onToggle={(next) => updateNotificationPref("browserPush", next)}
+                  actionLabel={!notificationPrefs.enabled
+                    ? undefined
+                    : notificationPrefs.webPermission === "granted"
+                      ? "Granted"
+                      : "Enable"}
+                  onAction={!notificationPrefs.enabled
+                    ? undefined
+                    : requestWebPermission}
+                />
+                <NotificationToggleRow
+                  label="Email notifications"
+                  description="Receive updates in your inbox."
+                  value={notificationPrefs.email}
+                  disabled={!notificationPrefs.enabled}
+                  onToggle={(next) => updateNotificationPref("email", next)}
+                />
+                <NotificationToggleRow
+                  label="SMS alerts"
+                  description="Send important alerts via text."
+                  value={notificationPrefs.sms}
+                  disabled={!notificationPrefs.enabled}
+                  onToggle={(next) => updateNotificationPref("sms", next)}
+                />
+                <NotificationToggleRow
+                  label="Product updates"
+                  description="Get tips, announcements, and new feature highlights."
+                  value={notificationPrefs.productUpdates}
+                  disabled={!notificationPrefs.enabled}
+                  onToggle={(next) => updateNotificationPref("productUpdates", next)}
+                />
+                <NotificationToggleRow
+                  label="Low stock alerts"
+                  description="Notify when items fall below threshold."
+                  value={notificationPrefs.lowStock}
+                  disabled={!notificationPrefs.enabled}
+                  onToggle={(next) => updateNotificationPref("lowStock", next)}
+                />
+                <div>
+                  <label className={styles.label}>Notification cadence</label>
+                  <select
+                    className={styles.select}
+                    value={notificationPrefs.frequency}
+                    onChange={(e) => updateNotificationPref("frequency", e.target.value as NotificationPreferences["frequency"])}
+                    disabled={!notificationPrefs.enabled}
+                  >
+                    {frequencyOptions.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className={styles.actions}>
+                <button className={styles.button} type="submit" disabled={saving}>
+                  {saving ? "Saving…" : "Save Notifications"}
                 </button>
               </div>
             </form>
@@ -312,17 +597,26 @@ export default function SettingsForm() {
 }
 
 function ConnectedGoogleRow({ session, supabase, onStatus }: { session: any; supabase: any; onStatus: (msg: string) => void }) {
-  const isConnected = Array.isArray(session?.user?.identities)
-    ? session.user.identities.some((id: any) => id?.provider === 'google')
-    : !!session?.user?.app_metadata?.provider && session.user.app_metadata.provider === 'google';
+  const identities = Array.isArray(session?.user?.identities) ? session.user.identities : [];
+  const providers = Array.isArray(session?.user?.app_metadata?.providers) ? session.user.app_metadata.providers : [];
+  const isConnected = identities.some((id: any) => id?.provider === 'google') || providers.includes('google') || (!!session?.user?.app_metadata?.provider && session.user.app_metadata.provider === 'google');
 
   const connectGoogle = async () => {
     try {
       onStatus("");
       const origin = typeof window !== 'undefined' ? window.location.origin : undefined;
       const redirectTo = origin ? `${origin}/login` : undefined;
-      const { data, error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } });
-      if (error) throw error;
+      if (isConnected) {
+        onStatus("Google already connected.");
+        return;
+      }
+      if (session) {
+        const { error } = await supabase.auth.linkIdentity({ provider: 'google', options: { redirectTo } });
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } });
+        if (error) throw error;
+      }
       // Supabase will redirect; if using PKCE without redirect, handle accordingly.
       onStatus("Redirecting to Google OAuth…");
     } catch (err: any) {
@@ -368,13 +662,69 @@ function ConnectedGoogleRow({ session, supabase, onStatus }: { session: any; sup
         <button className={styles.button} type="button" onClick={connectGoogle} disabled={isConnected}>
           {isConnected ? "Connected" : "Connect"}
         </button>
-        <button className={styles.button} type="button" onClick={disconnectGoogle} disabled={!isConnected}>
-          Disconnect
-        </button>
+        {isConnected && (
+          <button className={styles.button} type="button" onClick={disconnectGoogle}>
+            Disconnect
+          </button>
+        )}
         {/* <button className={styles.button} type="button" onClick={async () => { try { await supabase.auth.refreshSession(); onStatus("Session refreshed."); } catch { onStatus("Failed to refresh session."); } }}>
           Refresh
         </button> */}
       </div>
+    </div>
+  );
+}
+
+function NotificationToggleRow({
+  label,
+  description,
+  value,
+  disabled = false,
+  onToggle,
+  actionLabel,
+  onAction,
+}: {
+  label: string;
+  description?: string;
+  value: boolean;
+  disabled?: boolean;
+  onToggle: (next: boolean) => void;
+  actionLabel?: string;
+  onAction?: () => void;
+}) {
+  return (
+    <div className={styles.toggleRow}>
+      <div>
+        <p className={styles.toggleLabel} style={{ margin: 0 }}>
+          {label}
+        </p>
+        {description && (
+          <p className={styles.toggleDescription}>
+            {description}
+          </p>
+        )}
+      </div>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={value}
+        aria-disabled={disabled}
+        disabled={disabled}
+        className={`${styles.toggle} ${value ? styles.toggleOn : ""}`}
+        onClick={() => onToggle(!value)}
+      >
+        <span className={styles.toggleKnob} />
+      </button>
+      {onAction && actionLabel && (
+        <button
+          type="button"
+          className={styles.buttonSecondary}
+          onClick={onAction}
+          disabled={disabled}
+        >
+          {actionLabel}
+        </button>
+      )}
     </div>
   );
 }
