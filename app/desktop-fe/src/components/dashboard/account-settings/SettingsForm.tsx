@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef, useMemo } from "react";
+import React, { useEffect, useState, useRef, useMemo, useCallback } from "react";
 // Supabase hooks already imported below in this file
 import styles from "./account-settings.module.scss";
 import { useUserProfile } from "@/components/providers/user-profile-context";
@@ -98,12 +98,19 @@ export default function SettingsForm() {
   const [notificationPrefs, setNotificationPrefs] = useState<NotificationPreferences>(() => deriveNotificationPrefs(session?.user));
   const [notificationDirty, setNotificationDirty] = useState(false);
   const lowStockNotifyRef = useRef(false);
+  const notificationSaveTimer = useRef<NodeJS.Timeout | null>(null);
+  const [notificationSaving, setNotificationSaving] = useState(false);
+  const [messageVisible, setMessageVisible] = useState(true);
+  const [messageLeaving, setMessageLeaving] = useState(false);
+  const noticeDismissTimer = useRef<NodeJS.Timeout | null>(null);
+  const NOTICE_ANIMATION_MS = 280;
 
   useEffect(() => {
     setNotificationPrefs(deriveNotificationPrefs(session?.user));
     setNotificationDirty(false);
     setProfile(getProfileDefaults(session?.user));
     setEmailLogin((prev) => ({ ...prev, email: session?.user?.email || prev.email }));
+    setMessageVisible(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user?.id]);
   const [saving, setSaving] = useState(false);
@@ -132,7 +139,7 @@ export default function SettingsForm() {
       } catch {}
       // Update local context so header reflects changes immediately
       setCtxProfile({ name: profile.name, email: profile.email });
-      setMessage("Profile updated");
+      setMessage("Profile saved");
     } catch (err) {
       setMessage("Failed to update profile");
     } finally {
@@ -152,7 +159,7 @@ export default function SettingsForm() {
     try {
       // TODO: Integrate with real auth API
       await new Promise((r) => setTimeout(r, 600));
-      setMessage("Password changed");
+      setMessage("Password saved");
       setSecurity({ currentPassword: "", newPassword: "", confirmPassword: "" });
     } catch (err) {
       setMessage("Failed to change password");
@@ -176,10 +183,16 @@ export default function SettingsForm() {
     }
   }
 
-  async function handleSaveNotifications(e: React.FormEvent) {
-    e.preventDefault();
-    setSaving(true);
-    setMessage(null);
+  const updateNotificationPref = <K extends keyof NotificationPreferences>(key: K, value: NotificationPreferences[K]) => {
+    setNotificationPrefs((prev) => ({ ...prev, [key]: value }));
+    setNotificationDirty(true);
+  };
+
+  const persistNotificationPrefs = async (autoSave: boolean) => {
+    if (notificationSaving) return;
+    if (!autoSave) setSaving(true);
+    setMessage("Saving notifications…");
+    setNotificationSaving(true);
     try {
       const { error } = await supabase.auth.updateUser({
         data: { notification_prefs: notificationPrefs },
@@ -188,19 +201,55 @@ export default function SettingsForm() {
       try {
         await supabase.auth.refreshSession();
       } catch {}
-      setMessage("Notification settings saved");
+      setMessage("Notifications saved");
+      setMessageVisible(true);
       setNotificationDirty(false);
     } catch (err) {
       setMessage("Failed to save notifications");
+      setMessageVisible(true);
     } finally {
-      setSaving(false);
+      setNotificationSaving(false);
+      if (!autoSave) setSaving(false);
     }
-  }
-
-  const updateNotificationPref = <K extends keyof NotificationPreferences>(key: K, value: NotificationPreferences[K]) => {
-    setNotificationPrefs((prev) => ({ ...prev, [key]: value }));
-    setNotificationDirty(true);
   };
+
+  const dismissNotice = useCallback(() => {
+    if (messageLeaving) return;
+    if (noticeDismissTimer.current) {
+      clearTimeout(noticeDismissTimer.current);
+      noticeDismissTimer.current = null;
+    }
+    setMessageLeaving(true);
+    setTimeout(() => {
+      setMessageVisible(false);
+      setMessage(null);
+      setMessageLeaving(false);
+    }, NOTICE_ANIMATION_MS);
+  }, [messageLeaving, NOTICE_ANIMATION_MS]);
+
+  useEffect(() => {
+    if (!message) return;
+    if (messageLeaving) return;
+    setMessageVisible(true);
+    setMessageLeaving(false);
+    if (noticeDismissTimer.current) clearTimeout(noticeDismissTimer.current);
+    noticeDismissTimer.current = setTimeout(() => {
+      dismissNotice();
+    }, 10000);
+    return () => {
+      if (noticeDismissTimer.current) {
+        clearTimeout(noticeDismissTimer.current);
+        noticeDismissTimer.current = null;
+      }
+    };
+  }, [message, dismissNotice, messageLeaving]);
+
+  useEffect(() => () => {
+    if (noticeDismissTimer.current) {
+      clearTimeout(noticeDismissTimer.current);
+      noticeDismissTimer.current = null;
+    }
+  }, []);
 
   const requestWebPermission = async () => {
     const hasNotificationSupport = typeof window !== "undefined" && typeof Notification !== "undefined";
@@ -243,6 +292,20 @@ export default function SettingsForm() {
     }
   }, [notificationPrefs.enabled, notificationPrefs.browserPush, notificationPrefs.lowStock, notificationPrefs.webPermission]);
 
+  useEffect(() => {
+    if (!notificationDirty) return;
+    if (notificationSaveTimer.current) {
+      clearTimeout(notificationSaveTimer.current);
+    }
+    notificationSaveTimer.current = setTimeout(() => {
+      persistNotificationPrefs(true);
+    }, 800);
+    return () => {
+      if (notificationSaveTimer.current) clearTimeout(notificationSaveTimer.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notificationPrefs, notificationDirty]);
+
 
   async function handleLinkEmailLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -273,9 +336,21 @@ export default function SettingsForm() {
 
   return (
     <div className={styles.container}>
-      {message && (
-        <div className={styles.notice}>
+      {message && messageVisible && (
+        <div
+          className={`${styles.floatingNotice} ${messageLeaving ? styles.floatingNoticeLeaving : styles.floatingNoticeEntering}`}
+          role="status"
+          aria-live="polite"
+        >
           <span>{message}</span>
+          <button
+            type="button"
+            className={styles.floatingClose}
+            onClick={dismissNotice}
+            aria-label="Dismiss notification"
+          >
+            ×
+          </button>
         </div>
       )}
 
@@ -508,15 +583,10 @@ export default function SettingsForm() {
         {activeTab === 'notifications' && (
           <section className={styles.card}>
             <h2 className={styles.cardTitle}>Notifications</h2>
-            <form onSubmit={handleSaveNotifications} className={styles.gridGap}>
+            <div className={styles.gridGap} role="form" aria-label="Notification preferences">
               <p style={{ margin: 0, color: '#4b5563' }}>
                 Choose how you want to be notified. We recommend keeping at least one channel on.
               </p>
-              {notificationDirty && (
-                <p style={{ margin: 0, color: '#b45309', fontSize: '0.875rem' }}>
-                  You have unsaved changes.
-                </p>
-              )}
               <div className={styles.gridGap}>
                 <NotificationToggleRow
                   label="Enable notifications"
@@ -583,12 +653,7 @@ export default function SettingsForm() {
                   </select>
                 </div>
               </div>
-              <div className={styles.actions}>
-                <button className={styles.button} type="submit" disabled={saving}>
-                  {saving ? "Saving…" : "Save Notifications"}
-                </button>
-              </div>
-            </form>
+            </div>
           </section>
         )}
       </div>
@@ -692,8 +757,15 @@ function NotificationToggleRow({
   actionLabel?: string;
   onAction?: () => void;
 }) {
+  const handleRowClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (disabled) return;
+    const target = e.target as HTMLElement;
+    if (target.closest('button')) return; // avoid double-trigger when clicking buttons
+    onToggle(!value);
+  };
+
   return (
-    <div className={styles.toggleRow}>
+    <div className={styles.toggleRow} onClick={handleRowClick} role="presentation">
       <div>
         <p className={styles.toggleLabel} style={{ margin: 0 }}>
           {label}
@@ -710,7 +782,7 @@ function NotificationToggleRow({
         aria-checked={value}
         aria-disabled={disabled}
         disabled={disabled}
-        className={`${styles.toggle} ${value ? styles.toggleOn : ""}`}
+        className={`${styles.toggle} ${value ? styles.toggleOn : ""} ${disabled ? styles.toggleDisabled : ""}`}
         onClick={() => onToggle(!value)}
       >
         <span className={styles.toggleKnob} />

@@ -92,8 +92,6 @@
 .card {
   width: 100%;
   background-color: #fff;
-  // box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  // border: 1px solid #e5e7eb;
   padding: 1.5rem;
   box-sizing: border-box;
 
@@ -116,7 +114,6 @@
   font-size: 0.875rem;
   font-weight: 500;
   color: #374151;
-  margin-bottom: 0.5rem;
 }
 
 .input,
@@ -144,7 +141,6 @@
   align-items: center;
   justify-content: flex-end;
   gap: 0.75rem;
-  padding-top: 1rem;
   border-top: 1px solid #e5e7eb;
   @include responsive (sm) {
     flex-direction: column;
@@ -180,6 +176,73 @@
   border: 1px solid #bfdbfe;
   border-radius: 0.5rem;
   color: #1e3a8a;
+}
+
+.floatingNotice {
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  min-width: 280px;
+  max-width: 360px;
+  aspect-ratio: 2 / 1;
+  box-sizing: border-box;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 0.75rem;
+  color: #1e3a8a;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  pointer-events: auto;
+  will-change: transform, opacity;
+}
+
+.floatingNoticeEntering {
+  animation: noticeIn 280ms ease-out forwards;
+}
+
+.floatingNoticeLeaving {
+  animation: noticeOut 280ms ease-in forwards;
+}
+
+@keyframes noticeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes noticeOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+}
+
+.floatingClose {
+  background: transparent;
+  border: none;
+  color: #1e3a8a;
+  font-size: 1.15rem;
+  cursor: pointer;
+  line-height: 1;
+  align-self: flex-start;
+
+  &:hover {
+    color: #0f2166;
+  }
 }
 
 .sectionGridTwo {
@@ -261,6 +324,16 @@
 
 .toggleOn .toggleKnob {
   transform: translateX(20px);
+}
+
+.toggleDisabled {
+  background-color: #d1d5db !important;
+}
+
+.toggleDisabled .toggleKnob {
+  transform: translateX(0) !important;
+  background-color: #f3f4f6;
+  box-shadow: none;
 }
 
 .buttonSecondary {
