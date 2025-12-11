@@ -5,6 +5,11 @@ import React, { useEffect, useState, useRef, useMemo, useCallback } from "react"
 import styles from "./account-settings.module.scss";
 import { useUserProfile } from "@/components/providers/user-profile-context";
 import { useSupabaseSession, useSupabase } from "@/components/providers/supabase-provider";
+import { ProfileTab } from "./ProfileTab";
+import { ConnectedTab } from "./ConnectedTab";
+import { SecurityTab } from "./SecurityTab";
+import { PreferencesTab } from "./PreferencesTab";
+import { NotificationsTab } from "./NotificationsTab";
 
 type Profile = {
   name: string;
@@ -66,12 +71,16 @@ export default function SettingsForm() {
   const [preferences, setPreferences] = useState<Preferences>({
     theme: "system",
   });
-  const frequencyOptions = useMemo(() => ([
-    { value: "immediate", label: "Immediate" },
-    { value: "hourly", label: "Hourly digest" },
-    { value: "daily", label: "Daily digest" },
-    { value: "weekly", label: "Weekly digest" },
-  ] as const), []);
+  const frequencyOptions = useMemo(
+    () =>
+      ([
+        { value: "immediate", label: "Immediate" },
+        { value: "hourly", label: "Hourly digest" },
+        { value: "daily", label: "Daily digest" },
+        { value: "weekly", label: "Weekly digest" },
+      ] as const),
+    []
+  );
   const notificationDefaults: NotificationPreferences = {
     enabled: true,
     browserPush: true,
@@ -95,7 +104,9 @@ export default function SettingsForm() {
     };
   };
 
-  const [notificationPrefs, setNotificationPrefs] = useState<NotificationPreferences>(() => deriveNotificationPrefs(session?.user));
+  const [notificationPrefs, setNotificationPrefs] = useState<NotificationPreferences>(() =>
+    deriveNotificationPrefs(session?.user)
+  );
   const [notificationDirty, setNotificationDirty] = useState(false);
   const lowStockNotifyRef = useRef(false);
   const notificationSaveTimer = useRef<NodeJS.Timeout | null>(null);
@@ -244,12 +255,15 @@ export default function SettingsForm() {
     };
   }, [message, dismissNotice, messageLeaving]);
 
-  useEffect(() => () => {
-    if (noticeDismissTimer.current) {
-      clearTimeout(noticeDismissTimer.current);
-      noticeDismissTimer.current = null;
-    }
-  }, []);
+  useEffect(
+    () => () => {
+      if (noticeDismissTimer.current) {
+        clearTimeout(noticeDismissTimer.current);
+        noticeDismissTimer.current = null;
+      }
+    },
+    []
+  );
 
   const requestWebPermission = async () => {
     const hasNotificationSupport = typeof window !== "undefined" && typeof Notification !== "undefined";
@@ -305,7 +319,6 @@ export default function SettingsForm() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notificationPrefs, notificationDirty]);
-
 
   async function handleLinkEmailLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -387,416 +400,62 @@ export default function SettingsForm() {
         </div>
 
         {/* Profile Section */}
-        {activeTab === 'profile' && (
-          <div className={styles.sectionGridTwo}>
-            <section className={styles.card}>
-              <h2 className={styles.cardTitle}>Profile</h2>
-              <form onSubmit={handleSaveProfile} className={styles.gridGap}>
-                <div>
-                  <label className={styles.label}>Name</label>
-                  <input
-                    className={styles.input}
-                    type="text"
-                    value={profile.name}
-                    onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                    placeholder="Your name"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className={styles.label}>Email</label>
-                  <input
-                    className={styles.input}
-                    type="email"
-                    value={profile.email}
-                    onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                    placeholder="you@example.com"
-                    required
-                  />
-                </div>
-                <div className={styles.actions}>
-                  <button className={styles.button} type="submit" disabled={saving}>
-                    {saving ? "Saving…" : "Save Profile"}
-                  </button>
-                </div>
-              </form>
-            </section>
-
-            {/* Optional extra card for avatar or bio to fill grid */}
-            <section className={styles.card}>
-              <h2 className={styles.cardTitle}>Avatar</h2>
-              <div className={styles.gridGap}>
-                <p>Upload or change your profile picture (placeholder).</p>
-                <div className={styles.actions}>
-                  <button className={styles.button} type="button">Upload</button>
-                </div>
-              </div>
-            </section>
-          </div>
+        {activeTab === "profile" && (
+          <ProfileTab
+            profile={profile}
+            setProfile={setProfile}
+            saving={saving}
+            onSaveProfile={handleSaveProfile}
+          />
         )}
 
         {/* Connected Accounts Section */}
-        {activeTab === 'connected' && (
-          <section className={styles.card}>
-            <h2 className={styles.cardTitle}>Connected Accounts</h2>
-            <div className={styles.gridGap}>
-              <p>Manage external login providers linked to your account.</p>
-              <div className={styles.gridGap}>
-                <ConnectedGoogleRow session={session} supabase={supabase} onStatus={(msg) => setMessage(msg)} />
-                <div className={styles.gridGap}>
-                  <label className={styles.label}>Email &amp; Password</label>
-                  <p>Set up or update a password login for this account.</p>
-                  <p style={{ margin: 0, color: '#374151' }}>
-                    Status: {isEmailConnected ? 'Connected' : 'Not connected'}
-                  </p>
-                  <form onSubmit={handleLinkEmailLogin} className={styles.gridGap}>
-                    <div>
-                      <label className={styles.label}>Email</label>
-                      <input
-                        className={styles.input}
-                        type="email"
-                        value={emailLogin.email}
-                        onChange={(e) => setEmailLogin({ ...emailLogin, email: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className={styles.label}>Password</label>
-                      <input
-                        className={styles.input}
-                        type="password"
-                        value={emailLogin.password}
-                        onChange={(e) => setEmailLogin({ ...emailLogin, password: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className={styles.label}>Confirm Password</label>
-                      <input
-                        className={styles.input}
-                        type="password"
-                        value={emailLogin.confirmPassword}
-                        onChange={(e) => setEmailLogin({ ...emailLogin, confirmPassword: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div className={styles.actions}>
-                      <button className={styles.button} type="submit" disabled={linkingEmail}>
-                        {linkingEmail ? "Saving…" : isEmailConnected ? "Update login" : "Add email login"}
-                      </button>
-                    </div>
-                  </form>
-                </div>
-                <div>
-                  <label className={styles.label}>Facebook</label>
-                  <div className={styles.actions}>
-                    <button className={styles.button} type="button" disabled>Connect</button>
-                    {isFacebookConnected && (
-                      <button className={styles.button} type="button" disabled>Disconnect</button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
+        {activeTab === "connected" && (
+          <ConnectedTab
+            session={session}
+            supabase={supabase}
+            isEmailConnected={isEmailConnected}
+            isFacebookConnected={isFacebookConnected}
+            emailLogin={emailLogin}
+            setEmailLogin={setEmailLogin}
+            handleLinkEmailLogin={handleLinkEmailLogin}
+            linkingEmail={linkingEmail}
+            onStatus={(msg: string) => setMessage(msg)}
+          />
         )}
 
         {/* Security Section */}
-        {activeTab === 'security' && (
-          <section className={styles.card}>
-            <h2 className={styles.cardTitle}>Security</h2>
-            <form onSubmit={handleChangePassword} className={styles.gridGap}>
-              <div>
-                <label className={styles.label}>Current Password</label>
-                <input
-                  className={styles.input}
-                  type="password"
-                  value={security.currentPassword}
-                  onChange={(e) =>
-                    setSecurity({ ...security, currentPassword: e.target.value })
-                  }
-                  required
-                />
-              </div>
-              <div>
-                <label className={styles.label}>New Password</label>
-                <input
-                  className={styles.input}
-                  type="password"
-                  value={security.newPassword}
-                  onChange={(e) =>
-                    setSecurity({ ...security, newPassword: e.target.value })
-                  }
-                  required
-                />
-              </div>
-              <div>
-                <label className={styles.label}>Confirm New Password</label>
-                <input
-                  className={styles.input}
-                  type="password"
-                  value={security.confirmPassword}
-                  onChange={(e) =>
-                    setSecurity({ ...security, confirmPassword: e.target.value })
-                  }
-                  required
-                />
-              </div>
-              <div className={styles.actions}>
-                <button className={styles.button} type="submit" disabled={saving}>
-                  {saving ? "Saving…" : "Change Password"}
-                </button>
-              </div>
-            </form>
-          </section>
+        {activeTab === "security" && (
+          <SecurityTab
+            security={security}
+            setSecurity={setSecurity}
+            saving={saving}
+            onChangePassword={handleChangePassword}
+          />
         )}
 
         {/* Preferences Section */}
-        {activeTab === 'preferences' && (
-          <section className={styles.card}>
-            <h2 className={styles.cardTitle}>Preferences</h2>
-            <form onSubmit={handleSavePreferences} className={styles.gridGap}>
-              <div>
-                <label className={styles.label}>Theme</label>
-                <select
-                  className={styles.select}
-                  value={preferences.theme}
-                  onChange={(e) =>
-                    setPreferences({ ...preferences, theme: e.target.value as Preferences["theme"] })
-                  }
-                >
-                  <option value="system">System</option>
-                  <option value="light">Light</option>
-                  <option value="dark">Dark</option>
-                </select>
-              </div>
-              <div className={styles.actions}>
-                <button className={styles.button} type="submit" disabled={saving}>
-                  {saving ? "Saving…" : "Save Preferences"}
-                </button>
-              </div>
-            </form>
-          </section>
+        {activeTab === "preferences" && (
+          <PreferencesTab
+            preferences={preferences}
+            setPreferences={setPreferences}
+            saving={saving}
+            onSavePreferences={handleSavePreferences}
+          />
         )}
 
         {/* Notifications Section */}
-        {activeTab === 'notifications' && (
-          <section className={styles.card}>
-            <h2 className={styles.cardTitle}>Notifications</h2>
-            <div className={styles.gridGap} role="form" aria-label="Notification preferences">
-              <p style={{ margin: 0, color: '#4b5563' }}>
-                Choose how you want to be notified. We recommend keeping at least one channel on.
-              </p>
-              <div className={styles.gridGap}>
-                <NotificationToggleRow
-                  label="Enable notifications"
-                  description="Master switch for all notifications."
-                  value={notificationPrefs.enabled}
-                  onToggle={(next) => updateNotificationPref("enabled", next)}
-                />
-                <NotificationToggleRow
-                  label="Web notifications"
-                  description="Show alerts in your browser."
-                  value={notificationPrefs.browserPush}
-                  disabled={!notificationPrefs.enabled}
-                  onToggle={(next) => updateNotificationPref("browserPush", next)}
-                  actionLabel={!notificationPrefs.enabled
-                    ? undefined
-                    : notificationPrefs.webPermission === "granted"
-                      ? "Granted"
-                      : "Enable"}
-                  onAction={!notificationPrefs.enabled
-                    ? undefined
-                    : requestWebPermission}
-                />
-                <NotificationToggleRow
-                  label="Email notifications"
-                  description="Receive updates in your inbox."
-                  value={notificationPrefs.email}
-                  disabled={!notificationPrefs.enabled}
-                  onToggle={(next) => updateNotificationPref("email", next)}
-                />
-                <NotificationToggleRow
-                  label="SMS alerts"
-                  description="Send important alerts via text."
-                  value={notificationPrefs.sms}
-                  disabled={!notificationPrefs.enabled}
-                  onToggle={(next) => updateNotificationPref("sms", next)}
-                />
-                <NotificationToggleRow
-                  label="Product updates"
-                  description="Get tips, announcements, and new feature highlights."
-                  value={notificationPrefs.productUpdates}
-                  disabled={!notificationPrefs.enabled}
-                  onToggle={(next) => updateNotificationPref("productUpdates", next)}
-                />
-                <NotificationToggleRow
-                  label="Low stock alerts"
-                  description="Notify when items fall below threshold."
-                  value={notificationPrefs.lowStock}
-                  disabled={!notificationPrefs.enabled}
-                  onToggle={(next) => updateNotificationPref("lowStock", next)}
-                />
-                <div>
-                  <label className={styles.label}>Notification cadence</label>
-                  <select
-                    className={styles.select}
-                    value={notificationPrefs.frequency}
-                    onChange={(e) => updateNotificationPref("frequency", e.target.value as NotificationPreferences["frequency"])}
-                    disabled={!notificationPrefs.enabled}
-                  >
-                    {frequencyOptions.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-          </section>
+        {activeTab === "notifications" && (
+          <NotificationsTab
+            notificationPrefs={notificationPrefs}
+            updateNotificationPref={updateNotificationPref}
+            frequencyOptions={frequencyOptions}
+            requestWebPermission={requestWebPermission}
+            notificationSaving={notificationSaving}
+            notificationDirty={notificationDirty}
+          />
         )}
       </div>
-    </div>
-  );
-}
-
-function ConnectedGoogleRow({ session, supabase, onStatus }: { session: any; supabase: any; onStatus: (msg: string) => void }) {
-  const identities = Array.isArray(session?.user?.identities) ? session.user.identities : [];
-  const providers = Array.isArray(session?.user?.app_metadata?.providers) ? session.user.app_metadata.providers : [];
-  const isConnected = identities.some((id: any) => id?.provider === 'google') || providers.includes('google') || (!!session?.user?.app_metadata?.provider && session.user.app_metadata.provider === 'google');
-
-  const connectGoogle = async () => {
-    try {
-      onStatus("");
-      const origin = typeof window !== 'undefined' ? window.location.origin : undefined;
-      const redirectTo = origin ? `${origin}/login` : undefined;
-      if (isConnected) {
-        onStatus("Google already connected.");
-        return;
-      }
-      if (session) {
-        const { error } = await supabase.auth.linkIdentity({ provider: 'google', options: { redirectTo } });
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo } });
-        if (error) throw error;
-      }
-      // Supabase will redirect; if using PKCE without redirect, handle accordingly.
-      onStatus("Redirecting to Google OAuth…");
-    } catch (err: any) {
-      onStatus(err?.message || "Failed to start Google connect");
-    }
-  };
-
-  const disconnectGoogle = async () => {
-    try {
-      onStatus("");
-      const identities: any[] = session?.user?.identities || [];
-      const googleIdentity = identities.find((i: any) => i?.provider === 'google');
-      if (!googleIdentity) {
-        onStatus("Google is not connected.");
-        return;
-      }
-      const { error } = await supabase.auth.unlinkIdentity({ provider: 'google', identity_id: googleIdentity?.identity_id });
-      if (error) throw error;
-      onStatus("Google disconnected.");
-      // Attempt to refresh the session so UI updates immediately
-      try {
-        await supabase.auth.refreshSession();
-      } catch {}
-    } catch (err: any) {
-      onStatus(err?.message || "Failed to disconnect Google");
-    }
-  };
-
-  return (
-    <div className={styles.providerRow}>
-      <div className={styles.providerLeft}>
-        <span className={styles.providerLogo} aria-hidden>
-          {/* Minimal Google "G" logo */}
-          <svg width="24" height="24" viewBox="0 0 24 24">
-            <g fill="none" fillRule="evenodd">
-              <path d="M12 10.2v3.9h5.6c-.24 1.44-1.7 4.22-5.6 4.22-3.37 0-6.12-2.8-6.12-6.25S8.63 5.82 12 5.82c1.92 0 3.22.82 3.96 1.53l2.7-2.61C17.16 3.34 14.8 2.5 12 2.5 6.93 2.5 2.8 6.63 2.8 11.7S6.93 20.9 12 20.9c6.3 0 9.3-4.41 9.3-8.95 0-.6-.06-1.02-.14-1.45H12z" fill="#4285F4"/>
-            </g>
-          </svg>
-        </span>
-        <label className={styles.label}>Google</label>
-      </div>
-      <div className={styles.actions}>
-        <button className={styles.button} type="button" onClick={connectGoogle} disabled={isConnected}>
-          {isConnected ? "Connected" : "Connect"}
-        </button>
-        {isConnected && (
-          <button className={styles.button} type="button" onClick={disconnectGoogle}>
-            Disconnect
-          </button>
-        )}
-        {/* <button className={styles.button} type="button" onClick={async () => { try { await supabase.auth.refreshSession(); onStatus("Session refreshed."); } catch { onStatus("Failed to refresh session."); } }}>
-          Refresh
-        </button> */}
-      </div>
-    </div>
-  );
-}
-
-function NotificationToggleRow({
-  label,
-  description,
-  value,
-  disabled = false,
-  onToggle,
-  actionLabel,
-  onAction,
-}: {
-  label: string;
-  description?: string;
-  value: boolean;
-  disabled?: boolean;
-  onToggle: (next: boolean) => void;
-  actionLabel?: string;
-  onAction?: () => void;
-}) {
-  const handleRowClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (disabled) return;
-    const target = e.target as HTMLElement;
-    if (target.closest('button')) return; // avoid double-trigger when clicking buttons
-    onToggle(!value);
-  };
-
-  return (
-    <div className={styles.toggleRow} onClick={handleRowClick} role="presentation">
-      <div>
-        <p className={styles.toggleLabel} style={{ margin: 0 }}>
-          {label}
-        </p>
-        {description && (
-          <p className={styles.toggleDescription}>
-            {description}
-          </p>
-        )}
-      </div>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={value}
-        aria-disabled={disabled}
-        disabled={disabled}
-        className={`${styles.toggle} ${value ? styles.toggleOn : ""} ${disabled ? styles.toggleDisabled : ""}`}
-        onClick={() => onToggle(!value)}
-      >
-        <span className={styles.toggleKnob} />
-      </button>
-      {onAction && actionLabel && (
-        <button
-          type="button"
-          className={styles.buttonSecondary}
-          onClick={onAction}
-          disabled={disabled}
-        >
-          {actionLabel}
-        </button>
-      )}
     </div>
   );
 }
