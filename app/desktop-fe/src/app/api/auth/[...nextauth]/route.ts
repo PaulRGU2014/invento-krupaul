@@ -42,7 +42,6 @@ const handler = NextAuth({
           id: user.id,
           name: user.name || user.email.split("@")[0],
           email: user.email,
-          emailVerified: null,
         };
         return nextUser;
       },
