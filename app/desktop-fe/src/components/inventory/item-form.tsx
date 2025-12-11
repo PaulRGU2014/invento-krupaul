@@ -12,6 +12,9 @@ interface ItemFormProps {
 }
 
 export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
+  const DISCRETE_UNITS = new Set(['pieces', 'boxes', 'cans', 'bottles']);
+  const isDiscreteUnit = (unit: string) => DISCRETE_UNITS.has(unit);
+
   const [formData, setFormData] = useState({
     name: '',
     category: '',
@@ -56,10 +59,32 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: ['quantity', 'minStock', 'price'].includes(name) ? parseFloat(value) || 0 : value,
-    }));
+    setFormData(prev => {
+      let nextVal: any = value;
+      if (name === 'unit') {
+        // when unit changes, keep quantity/minStock integer if discrete
+        const discrete = isDiscreteUnit(value);
+        return {
+          ...prev,
+          unit: value,
+          quantity: discrete ? Math.floor(Number(prev.quantity) || 0) : Number(prev.quantity) || 0,
+          minStock: discrete ? Math.floor(Number(prev.minStock) || 0) : Number(prev.minStock) || 0,
+        };
+      }
+
+      if (name === 'quantity' || name === 'minStock') {
+        const discrete = isDiscreteUnit(prev.unit);
+        const num = discrete ? Math.floor(Number(value) || 0) : parseFloat(value) || 0;
+        nextVal = Math.max(0, num);
+      } else if (name === 'price') {
+        nextVal = Math.max(0, parseFloat(value) || 0);
+      }
+
+      return {
+        ...prev,
+        [name]: nextVal,
+      };
+    });
   };
 
   return (
@@ -110,9 +135,10 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
                 name="quantity"
                 required
                 min="0"
-                step="0.01"
+                step={isDiscreteUnit(formData.unit) ? 1 : 0.01}
                 value={formData.quantity}
                 onChange={handleChange}
+                inputMode={isDiscreteUnit(formData.unit) ? 'numeric' : 'decimal'}
               />
             </div>
 
@@ -144,9 +170,10 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
                 name="minStock"
                 required
                 min="0"
-                step="0.01"
+                step={isDiscreteUnit(formData.unit) ? 1 : 0.01}
                 value={formData.minStock}
                 onChange={handleChange}
+                inputMode={isDiscreteUnit(formData.unit) ? 'numeric' : 'decimal'}
               />
             </div>
 
