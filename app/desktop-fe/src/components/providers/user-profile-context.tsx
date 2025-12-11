@@ -30,10 +30,14 @@ export function UserProfileProvider({
 
   // Keep context in sync if the initial values change (e.g., session loads)
   useEffect(() => {
-    setProfile((prev) => ({
-      name: initialName || prev.name,
-      email: initialEmail || prev.email,
-    }));
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setProfile((prev) => {
+      const next = {
+        name: initialName || prev.name,
+        email: initialEmail || prev.email,
+      };
+      return next.name === prev.name && next.email === prev.email ? prev : next;
+    });
   }, [initialName, initialEmail]);
 
   const value = useMemo(() => ({ profile, setProfile }), [profile]);

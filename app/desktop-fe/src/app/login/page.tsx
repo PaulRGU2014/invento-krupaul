@@ -40,7 +40,6 @@ export default function LoginPage() {
     (async () => {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
-        // eslint-disable-next-line no-console
         console.error(error.message);
         return;
       }
@@ -102,13 +101,13 @@ export default function LoginPage() {
               setGoogleError(null);
               const redirectBase = process.env.NEXT_PUBLIC_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : '');
               try {
-                const { data, error } = await supabase.auth.signInWithOAuth({
+                const { error } = await supabase.auth.signInWithOAuth({
                   provider: 'google',
                   options: { redirectTo: `${redirectBase}/home` }
                 });
                 if (error) setGoogleError(error.message);
-              } catch (e: any) {
-                setGoogleError(e?.message || 'Google sign-in failed');
+              } catch (e: unknown) {
+                setGoogleError(e instanceof Error ? e.message : 'Google sign-in failed');
               }
             }}
           >
@@ -130,7 +129,7 @@ export default function LoginPage() {
           type="button"
           onClick={() => router.push("/signup")}
         >
-          Don't have an account? Sign up
+          Don&apos;t have an account? Sign up
         </button>
       </form>
     </div>

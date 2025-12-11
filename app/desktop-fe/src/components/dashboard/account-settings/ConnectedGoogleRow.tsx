@@ -2,12 +2,21 @@
 "use client";
 
 import React from "react";
+import { Session, SupabaseClient } from "@supabase/supabase-js";
 import styles from "./account-settings.module.scss";
 
-export function ConnectedGoogleRow({ session, supabase, onStatus }: { session: any; supabase: any; onStatus: (msg: string) => void }) {
-  const identities = Array.isArray(session?.user?.identities) ? session.user.identities : [];
-  const providers = Array.isArray(session?.user?.app_metadata?.providers) ? session.user.app_metadata.providers : [];
-  const isConnected = identities.some((id: any) => id?.provider === 'google') || providers.includes('google') || (!!session?.user?.app_metadata?.provider && session.user.app_metadata.provider === 'google');
+type ConnectedGoogleRowProps = {
+  session: Session | null;
+  supabase: SupabaseClient;
+  onStatus: (msg: string) => void;
+};
+
+type Identity = { provider?: string; identity_id?: string };
+
+export function ConnectedGoogleRow({ session, supabase, onStatus }: ConnectedGoogleRowProps) {
+  const identities = Array.isArray(session?.user?.identities) ? (session.user.identities as Identity[]) : [];
+  const providers = Array.isArray(session?.user?.app_metadata?.providers) ? (session.user.app_metadata.providers as string[]) : [];
+  const isConnected = identities.some((id) => id?.provider === 'google') || providers.includes('google') || (!!session?.user?.app_metadata?.provider && session.user.app_metadata.provider === 'google');
 
   const connectGoogle = async () => {
     try {
@@ -27,16 +36,16 @@ export function ConnectedGoogleRow({ session, supabase, onStatus }: { session: a
       }
       // Supabase will redirect; if using PKCE without redirect, handle accordingly.
       onStatus("Redirecting to Google OAuth…");
-    } catch (err: any) {
-      onStatus(err?.message || "Failed to start Google connect");
+    } catch (err: unknown) {
+      onStatus(err instanceof Error ? err.message : "Failed to start Google connect");
     }
   };
 
   const disconnectGoogle = async () => {
     try {
       onStatus("");
-      const identities: any[] = session?.user?.identities || [];
-      const googleIdentity = identities.find((i: any) => i?.provider === 'google');
+      const identitiesForDisconnect: Identity[] = (session?.user?.identities as Identity[]) || [];
+      const googleIdentity = identitiesForDisconnect.find((i) => i?.provider === 'google');
       if (!googleIdentity) {
         onStatus("Google is not connected.");
         return;
@@ -48,8 +57,8 @@ export function ConnectedGoogleRow({ session, supabase, onStatus }: { session: a
       try {
         await supabase.auth.refreshSession();
       } catch {}
-    } catch (err: any) {
-      onStatus(err?.message || "Failed to disconnect Google");
+    } catch (err: unknown) {
+      onStatus(err instanceof Error ? err.message : "Failed to disconnect Google");
     }
   };
 

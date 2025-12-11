@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     try {
       const raw = await fs.readFile(dataPath, "utf8");
       users = JSON.parse(raw || "[]");
-    } catch (err) {
+    } catch {
       // If file doesn't exist or is invalid, start fresh
       users = [];
     }
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
     await fs.writeFile(dataPath, JSON.stringify(users, null, 2), "utf8");
 
     return NextResponse.json({ ok: true }, { status: 201 });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Unexpected error" }, { status: 500 });
   }
 }

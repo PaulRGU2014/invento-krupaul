@@ -90,6 +90,66 @@
   border-top: 1px solid #e5e7eb;
 }
 
+.scanRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+
+  input {
+    flex: 1;
+  }
+}
+
+.scanButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.9rem;
+  background-color: #0f172a;
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #111827;
+  }
+}
+
+.scanner {
+  margin-top: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.scannerVideo {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+  background: #000;
+}
+
+.hint {
+  margin-top: 0.25rem;
+  font-size: 0.825rem;
+  color: #4b5563;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #e0f2fe;
+  color: #0ea5e9;
+  padding: 0.25rem 0.55rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
 .cancelButton {
   padding: 0.5rem 1.5rem;
   color: #374151;

@@ -2,12 +2,13 @@
 "use client";
 
 import React from "react";
+import { Session, SupabaseClient } from "@supabase/supabase-js";
 import styles from "./account-settings.module.scss";
 import { ConnectedGoogleRow } from "./ConnectedGoogleRow";
 
 interface ConnectedTabProps {
-  session: any;
-  supabase: any;
+  session: Session | null;
+  supabase: SupabaseClient;
   isEmailConnected: boolean;
   isFacebookConnected: boolean;
   emailLogin: { email: string; password: string; confirmPassword: string };

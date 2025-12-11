@@ -21,7 +21,7 @@ export function EmailConfirmationGuard({ children }: Props) {
     return <>{children}</>; // allow child to show its own unauth UI
   }
 
-  const confirmed = !!(user.email_confirmed_at || (user as any).confirmed_at);
+  const confirmed = !!(user.email_confirmed_at || (user as { confirmed_at?: string }).confirmed_at);
 
   if (confirmed) {
     return <>{children}</>; // everything ok
@@ -39,9 +39,9 @@ export function EmailConfirmationGuard({ children }: Props) {
       } else {
         setResendStatus("sent");
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       setResendStatus("error");
-      setErrorMsg(e?.message || "Failed to resend confirmation email");
+      setErrorMsg(e instanceof Error ? e.message : "Failed to resend confirmation email");
     }
   };
 
@@ -84,7 +84,8 @@ export function EmailConfirmationGuard({ children }: Props) {
             setErrorMsg(null);
             // Refresh session state to see if email got confirmed meanwhile
             const { data } = await supabase.auth.getSession();
-            if (data.session?.user?.email_confirmed_at || (data.session?.user as any)?.confirmed_at) {
+            const legacyConfirmed = (data.session?.user as { confirmed_at?: string } | null)?.confirmed_at;
+            if (data.session?.user?.email_confirmed_at || legacyConfirmed) {
               // Force a re-render by updating internal state via auth listener already present
               location.reload();
             } else {

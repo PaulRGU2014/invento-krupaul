@@ -31,7 +31,7 @@ export default function SignupPage() {
     setLoading(true);
     setError(null);
     try {
-      const { data, error: signupError } = await supabase.auth.signUp({
+      const { error: signupError } = await supabase.auth.signUp({
         email,
         password,
         options: { data: { full_name: fullName } }
@@ -43,7 +43,7 @@ export default function SignupPage() {
       }
       // Optionally auto-login; Supabase may send confirmation email depending on project settings
       router.replace("/home");
-    } catch (err) {
+    } catch {
       setError("Network error");
       setLoading(false);
     }
@@ -143,8 +143,8 @@ export default function SignupPage() {
                     options: { redirectTo: `${redirectBase}/home` }
                   });
                   if (oauthError) setGoogleError(oauthError.message);
-                } catch (e: any) {
-                  setGoogleError(e?.message || 'Google sign-in failed');
+                } catch (e: unknown) {
+                  setGoogleError(e instanceof Error ? e.message : 'Google sign-in failed');
                 }
               }}
             >

@@ -21,7 +21,6 @@ export default function HomePage() {
   const [activeView, setActiveView] = useState<'dashboard' | 'inventory' | 'add' | 'settings'>('dashboard');
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
   const [items, setItems] = useState<InventoryItem[]>([]);
-  const [loadingItems, setLoadingItems] = useState(false);
 
   useEffect(() => {
     if (!loading && !authenticated) {
@@ -32,14 +31,9 @@ export default function HomePage() {
   useEffect(() => {
     const load = async () => {
       if (!authenticated) return;
-      setLoadingItems(true);
-      try {
-        const res = await fetchInventory(1, 100);
-        if (res?.success && Array.isArray(res.data)) {
-          setItems(res.data);
-        }
-      } finally {
-        setLoadingItems(false);
+      const res = await fetchInventory(1, 100);
+      if (res?.success && Array.isArray(res.data)) {
+        setItems(res.data);
       }
     };
     load();
@@ -130,7 +124,7 @@ export default function HomePage() {
     );
   }
 
-  const displayName = (session?.user?.user_metadata as any)?.full_name || "";
+  const displayName = (session?.user?.user_metadata as { full_name?: string } | undefined)?.full_name || "";
   const email = session?.user?.email || "";
 
   return (

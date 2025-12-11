@@ -7,7 +7,7 @@ import { useSupabaseSession } from "@/components/providers/supabase-provider";
 
 export default function AccountSettingsPage() {
   const { session } = useSupabaseSession();
-  const displayName = (session?.user?.user_metadata as any)?.full_name || "";
+  const displayName = (session?.user?.user_metadata as { full_name?: string } | undefined)?.full_name || "";
   const email = session?.user?.email || "";
 
   return (

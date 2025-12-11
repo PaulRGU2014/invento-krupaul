@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef, useMemo, useCallback } from "react";
+import { User } from "@supabase/supabase-js";
 // Supabase hooks already imported below in this file
 import styles from "./account-settings.module.scss";
 import { useUserProfile } from "@/components/providers/user-profile-context";
@@ -40,14 +41,16 @@ type NotificationPreferences = {
 type TabId = "profile" | "connected" | "security" | "preferences" | "notifications";
 type Tab = { id: TabId; label: string };
 
+type Identity = { provider?: string };
+
 export default function SettingsForm() {
   const { profile: ctxProfile, setProfile: setCtxProfile } = useUserProfile();
   // Supabase session first so state initializers can consume it safely
   const { session } = useSupabaseSession();
   const { supabase } = useSupabase();
-  const getProfileDefaults = (user: any): Profile => {
-    const fullName = user?.user_metadata?.full_name;
-    const email = user?.email;
+  const getProfileDefaults = (user: User | null): Profile => {
+    const fullName = user?.user_metadata?.full_name as string | undefined;
+    const email = user?.email as string | undefined;
     return {
       name: (fullName as string) || ctxProfile.name || "",
       email: (email as string) || ctxProfile.email || "",
@@ -92,8 +95,8 @@ export default function SettingsForm() {
     webPermission: undefined,
   };
 
-  const deriveNotificationPrefs = (user: any): NotificationPreferences => {
-    const stored = user?.user_metadata?.notification_prefs;
+  const deriveNotificationPrefs = (user: User | null): NotificationPreferences => {
+    const stored = user?.user_metadata?.notification_prefs as Partial<NotificationPreferences> | undefined;
     const freq = stored?.frequency;
     const allowedFreq = new Set(frequencyOptions.map((f) => f.value));
     const isValidFreq = freq && allowedFreq.has(freq);
@@ -128,9 +131,9 @@ export default function SettingsForm() {
   const [message, setMessage] = useState<string | null>(null);
   const [emailLogin, setEmailLogin] = useState({ email: session?.user?.email || ctxProfile.email || "", password: "", confirmPassword: "" });
   const [linkingEmail, setLinkingEmail] = useState(false);
-  const identities = Array.isArray(session?.user?.identities) ? session.user.identities : [];
-  const providers = Array.isArray(session?.user?.app_metadata?.providers) ? session?.user?.app_metadata?.providers : [];
-  const hasProvider = (name: string) => identities.some((id: any) => id?.provider === name) || providers.includes(name);
+  const identities = Array.isArray(session?.user?.identities) ? (session.user.identities as Identity[]) : [];
+  const providers = Array.isArray(session?.user?.app_metadata?.providers) ? (session?.user?.app_metadata?.providers as string[]) : [];
+  const hasProvider = (name: string) => identities.some((id) => id?.provider === name) || providers.includes(name);
   const isEmailConnected = hasProvider("email");
   const isFacebookConnected = hasProvider("facebook");
 
@@ -151,7 +154,7 @@ export default function SettingsForm() {
       // Update local context so header reflects changes immediately
       setCtxProfile({ name: profile.name, email: profile.email });
       setMessage("Profile saved");
-    } catch (err) {
+    } catch {
       setMessage("Failed to update profile");
     } finally {
       setSaving(false);
@@ -172,7 +175,7 @@ export default function SettingsForm() {
       await new Promise((r) => setTimeout(r, 600));
       setMessage("Password saved");
       setSecurity({ currentPassword: "", newPassword: "", confirmPassword: "" });
-    } catch (err) {
+    } catch {
       setMessage("Failed to change password");
     } finally {
       setSaving(false);
@@ -187,7 +190,7 @@ export default function SettingsForm() {
       // TODO: Persist preferences to user settings
       await new Promise((r) => setTimeout(r, 400));
       setMessage("Preferences saved");
-    } catch (err) {
+    } catch {
       setMessage("Failed to save preferences");
     } finally {
       setSaving(false);
@@ -215,7 +218,7 @@ export default function SettingsForm() {
       setMessage("Notifications saved");
       setMessageVisible(true);
       setNotificationDirty(false);
-    } catch (err) {
+    } catch {
       setMessage("Failed to save notifications");
       setMessageVisible(true);
     } finally {
@@ -281,8 +284,8 @@ export default function SettingsForm() {
       } else {
         setMessage("Browser notification permission dismissed.");
       }
-    } catch (err: any) {
-      setMessage(err?.message || "Failed to request notification permission.");
+    } catch (err: unknown) {
+      setMessage(err instanceof Error ? err.message : "Failed to request notification permission.");
     }
   };
 
@@ -340,7 +343,7 @@ export default function SettingsForm() {
       } catch {}
       setMessage(isEmailConnected ? "Login updated" : "Email login added");
       setEmailLogin((prev) => ({ ...prev, password: "", confirmPassword: "" }));
-    } catch (err) {
+    } catch {
       setMessage("Failed to update email login");
     } finally {
       setLinkingEmail(false);

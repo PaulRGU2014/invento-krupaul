@@ -1,6 +1,19 @@
 import { NextRequest } from 'next/server';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
+type InventoryRow = {
+  id: string;
+  user_id: string;
+  name: string;
+  category: string;
+  quantity: number;
+  unit: string;
+  min_stock: number;
+  price: number;
+  supplier: string | null;
+  updated_at: string;
+};
+
 function getSupabaseClient(token?: string): SupabaseClient {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
@@ -9,7 +22,7 @@ function getSupabaseClient(token?: string): SupabaseClient {
   }
   return createClient(url, anon, token
     ? { global: { headers: { Authorization: `Bearer ${token}` } } }
-    : undefined as any);
+    : undefined);
 }
 
 async function getUserIdFromToken(token: string): Promise<string> {
@@ -56,7 +69,8 @@ export async function GET(req: NextRequest) {
       .range(from, to);
     if (error) throw error;
 
-    const items = (data || []).map((it: any) => ({
+    const rawItems = (data || []) as InventoryRow[];
+    const items = rawItems.map((it) => ({
       id: it.id,
       name: it.name,
       category: it.category,
@@ -81,9 +95,9 @@ export async function GET(req: NextRequest) {
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
-  } catch (err: any) {
+  } catch (err: unknown) {
     return new Response(
-      JSON.stringify({ success: false, error: err?.message || 'Unexpected error' }),
+      JSON.stringify({ success: false, error: err instanceof Error ? err.message : 'Unexpected error' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
@@ -99,7 +113,15 @@ export async function POST(req: NextRequest) {
       return new Response(JSON.stringify({ success: false, error: 'Missing Bearer token' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
     }
     const userId = await getUserIdFromToken(token);
-    const body = await req.json();
+    const body = await req.json() as Partial<{
+      name: string;
+      category: string;
+      quantity: number;
+      unit: string;
+      minStock: number;
+      price: number;
+      supplier: string | null;
+    }>;
     const supabase = getSupabaseClient(token);
     const insert = {
       user_id: userId,
@@ -125,8 +147,8 @@ export async function POST(req: NextRequest) {
       lastUpdated: data.updated_at,
     };
     return new Response(JSON.stringify({ success: true, data: mapped }), { status: 200, headers: { 'Content-Type': 'application/json' } });
-  } catch (err: any) {
-    return new Response(JSON.stringify({ success: false, error: err?.message || 'Unexpected error' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+  } catch (err: unknown) {
+    return new Response(JSON.stringify({ success: false, error: err instanceof Error ? err.message : 'Unexpected error' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }
 
@@ -141,13 +163,21 @@ export async function PATCH(req: NextRequest) {
     const token = authHeader?.startsWith('Bearer ')
       ? authHeader.substring('Bearer '.length)
       : undefined;
-    const body = await req.json();
+    const body = await req.json() as Partial<{
+      name: string;
+      category: string;
+      quantity: number;
+      unit: string;
+      minStock: number;
+      price: number;
+      supplier: string | null;
+    }>;
     if (!token) {
       return new Response(JSON.stringify({ success: false, error: 'Missing Bearer token' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
     }
     const supabase = getSupabaseClient(token);
     const userId = await getUserIdFromToken(token);
-    const update: any = {};
+    const update: Partial<InventoryRow> = {};
     if (body.name !== undefined) update.name = body.name;
     if (body.category !== undefined) update.category = body.category;
     if (body.quantity !== undefined) update.quantity = body.quantity;
@@ -175,8 +205,8 @@ export async function PATCH(req: NextRequest) {
       lastUpdated: data.updated_at,
     };
     return new Response(JSON.stringify({ success: true, data: mapped }), { status: 200, headers: { 'Content-Type': 'application/json' } });
-  } catch (err: any) {
-    return new Response(JSON.stringify({ success: false, error: err?.message || 'Unexpected error' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+  } catch (err: unknown) {
+    return new Response(JSON.stringify({ success: false, error: err instanceof Error ? err.message : 'Unexpected error' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }
 
@@ -203,7 +233,7 @@ export async function DELETE(req: NextRequest) {
       .eq('user_id', userId);
     if (error) throw error;
     return new Response(JSON.stringify({ success: true, message: 'Deleted' }), { status: 200, headers: { 'Content-Type': 'application/json' } });
-  } catch (err: any) {
-    return new Response(JSON.stringify({ success: false, error: err?.message || 'Unexpected error' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+  } catch (err: unknown) {
+    return new Response(JSON.stringify({ success: false, error: err instanceof Error ? err.message : 'Unexpected error' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }
