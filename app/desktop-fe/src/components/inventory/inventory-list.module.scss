@@ -96,10 +96,46 @@
         td {
           padding: 1rem;
 
-          &.itemName {
+          .inlineField {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.35rem;
+          }
+
+          .inlineInput {
+            width: 100%;
+            max-width: 140px;
+            padding: 0.35rem 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            background: #fff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+
+            &:focus {
+              outline: none;
+              border-color: #007bff;
+              box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+            }
+
+            &.saving {
+              opacity: 0.65;
+              cursor: wait;
+            }
+          }
+
+          .priceInput {
+            max-width: 160px;
+          }
+
+          .unitLabel,
+          .currencyPrefix {
+            color: #6b7280;
+            font-size: 0.875rem;
+            white-space: nowrap;
+          }
+
+          &.itemName {
 
             .alertIcon {
               color: #dc2626;

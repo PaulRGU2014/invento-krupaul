@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { InventoryItem } from '@/types/inventory';
 import { Search, Edit2, Trash2, AlertTriangle } from 'lucide-react';
 import styles from './inventory-list.module.scss';
@@ -9,12 +9,29 @@ interface InventoryListProps {
   items: InventoryItem[];
   onEdit: (item: InventoryItem) => void;
   onDelete: (id: string) => void;
+  onInlineUpdate?: (id: string, updates: Pick<InventoryItem, 'quantity' | 'price'>) => Promise<void> | void;
 }
 
-export function InventoryList({ items, onEdit, onDelete }: InventoryListProps) {
+export function InventoryList({ items, onEdit, onDelete, onInlineUpdate }: InventoryListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [stockFilter, setStockFilter] = useState<'all' | 'low'>('all');
+  const [inlineValues, setInlineValues] = useState<Record<string, { quantity: number; price: number }>>({});
+  const [savingIds, setSavingIds] = useState<Record<string, boolean>>({});
+
+  // Keep inline values aligned with incoming items while preserving in-progress edits
+  useEffect(() => {
+    setInlineValues(prev => {
+      const next: Record<string, { quantity: number; price: number }> = {};
+      items.forEach(item => {
+        next[item.id] = {
+          quantity: prev[item.id]?.quantity ?? item.quantity,
+          price: prev[item.id]?.price ?? item.price,
+        };
+      });
+      return next;
+    });
+  }, [items]);
 
   const categories = ['all', ...new Set(items.map(item => item.category))];
 
@@ -26,6 +43,41 @@ export function InventoryList({ items, onEdit, onDelete }: InventoryListProps) {
     
     return matchesSearch && matchesCategory && matchesStock;
   });
+
+  const handleInlineChange = (id: string, field: 'quantity' | 'price', value: number) => {
+    setInlineValues(prev => ({
+      ...prev,
+      [id]: {
+        quantity: field === 'quantity' ? value : prev[id]?.quantity ?? items.find(item => item.id === id)?.quantity ?? 0,
+        price: field === 'price' ? value : prev[id]?.price ?? items.find(item => item.id === id)?.price ?? 0,
+      },
+    }));
+  };
+
+  const handleInlineSave = async (item: InventoryItem) => {
+    if (!onInlineUpdate) return;
+
+    const current = inlineValues[item.id];
+    if (!current) return;
+
+    const hasChanges = current.quantity !== item.quantity || current.price !== item.price;
+    if (!hasChanges) return;
+
+    setSavingIds(prev => ({ ...prev, [item.id]: true }));
+    try {
+      await onInlineUpdate(item.id, { quantity: current.quantity, price: current.price });
+    } catch (error) {
+      // Revert to server values on failure to keep UI consistent
+      setInlineValues(prev => ({
+        ...prev,
+        [item.id]: { quantity: item.quantity, price: item.price },
+      }));
+      window.alert('Failed to update item. Please try again.');
+      console.error('Inline update failed', error);
+    } finally {
+      setSavingIds(prev => ({ ...prev, [item.id]: false }));
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -89,46 +141,90 @@ export function InventoryList({ items, onEdit, onDelete }: InventoryListProps) {
                   </td>
                 </tr>
               ) : (
-                filteredItems.map(item => (
-                  <tr key={item.id}>
-                    <td className={styles.itemName}>
-                      {item.quantity <= item.minStock && (
-                        <AlertTriangle className={styles.alertIcon} size={16} />
-                      )}
-                      <span>{item.name}</span>
-                    </td>
-                    <td className={styles.category}>{item.category}</td>
-                    <td className={`${styles.quantity} ${item.quantity <= item.minStock ? styles.lowStock : ''}`}>
-                      {item.quantity} {item.unit}
-                    </td>
-                    <td className={styles.minStock}>{item.minStock} {item.unit}</td>
-                    <td className={styles.price}>${item.price.toFixed(2)}</td>
-                    <td className={styles.price}>${(item.quantity * item.price).toFixed(2)}</td>
-                    <td className={styles.supplier}>{item.supplier}</td>
-                    <td>
-                      <div className={styles.actions}>
-                        <button
-                          onClick={() => onEdit(item)}
-                          className={styles.editButton}
-                          title="Edit item"
-                        >
-                          <Edit2 size={18} />
-                        </button>
-                        <button
-                          onClick={() => {
-                            if (window.confirm(`Are you sure you want to delete ${item.name}?`)) {
-                              onDelete(item.id);
-                            }
-                          }}
-                          className={styles.deleteButton}
-                          title="Delete item"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                filteredItems.map(item => {
+                  const inlineValue = inlineValues[item.id] ?? { quantity: item.quantity, price: item.price };
+                  const isSaving = !!savingIds[item.id];
+                  const isLowStock = inlineValue.quantity <= item.minStock;
+
+                  return (
+                    <tr key={item.id}>
+                      <td className={styles.itemName}>
+                        {isLowStock && (
+                          <AlertTriangle className={styles.alertIcon} size={16} />
+                        )}
+                        <span>{item.name}</span>
+                      </td>
+                      <td className={styles.category}>{item.category}</td>
+                      <td className={`${styles.quantity}`}>
+                        <div className={styles.inlineField}>
+                          <input
+                            type="number"
+                            min={0}
+                            step={1}
+                            value={inlineValue.quantity}
+                            onChange={(e) => handleInlineChange(item.id, 'quantity', Math.max(0, Number(e.target.value) || 0))}
+                            onBlur={() => handleInlineSave(item)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                handleInlineSave(item);
+                              }
+                            }}
+                            disabled={isSaving}
+                            className={`${styles.inlineInput} ${isSaving ? styles.saving : ''} ${isLowStock ? styles.lowStock : ''}`}
+                            aria-label={`Quantity for ${item.name}`}
+                          />
+                          <span className={styles.unitLabel}>{item.unit}</span>
+                        </div>
+                      </td>
+                      <td className={styles.minStock}>{item.minStock} {item.unit}</td>
+                      <td className={styles.price}>
+                        <div className={styles.inlineField}>
+                          <span className={styles.currencyPrefix}>$</span>
+                          <input
+                            type="number"
+                            min={0}
+                            step={0.01}
+                            value={inlineValue.price}
+                            onChange={(e) => handleInlineChange(item.id, 'price', Math.max(0, Number(e.target.value) || 0))}
+                            onBlur={() => handleInlineSave(item)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                handleInlineSave(item);
+                              }
+                            }}
+                            disabled={isSaving}
+                            className={`${styles.inlineInput} ${styles.priceInput} ${isSaving ? styles.saving : ''}`}
+                            aria-label={`Unit price for ${item.name}`}
+                          />
+                        </div>
+                      </td>
+                      <td className={styles.price}>${(inlineValue.quantity * inlineValue.price).toFixed(2)}</td>
+                      <td className={styles.supplier}>{item.supplier}</td>
+                      <td>
+                        <div className={styles.actions}>
+                          <button
+                            onClick={() => onEdit(item)}
+                            className={styles.editButton}
+                            title="Edit item"
+                          >
+                            <Edit2 size={18} />
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (window.confirm(`Are you sure you want to delete ${item.name}?`)) {
+                                onDelete(item.id);
+                              }
+                            }}
+                            className={styles.deleteButton}
+                            title="Delete item"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

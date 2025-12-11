@@ -87,6 +87,26 @@ export default function HomePage() {
     }
   };
 
+  const handleInlineUpdate = async (id: string, updates: Pick<InventoryItem, 'quantity' | 'price'>) => {
+    const existing = items.find(item => item.id === id);
+    if (!existing) return;
+
+    const payload = {
+      name: existing.name,
+      category: existing.category,
+      quantity: updates.quantity,
+      unit: existing.unit,
+      minStock: existing.minStock,
+      price: updates.price,
+      supplier: existing.supplier,
+    };
+
+    const res = await updateInventoryItem(id, payload);
+    if (res?.success && res.data) {
+      setItems(prev => prev.map(item => item.id === id ? res.data : item));
+    }
+  };
+
   const handleEditItem = (item: InventoryItem) => {
     setEditingItem(item);
     setActiveView('add');
@@ -190,6 +210,7 @@ export default function HomePage() {
             items={items}
             onEdit={handleEditItem}
             onDelete={handleDeleteItem}
+            onInlineUpdate={handleInlineUpdate}
           />
         )}
         {activeView === 'add' && (
