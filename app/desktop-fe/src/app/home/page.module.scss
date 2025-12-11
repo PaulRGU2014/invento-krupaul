@@ -61,8 +61,17 @@
       gap: 0.5rem;
       color: #374151;
 
-      span {
-        @media (max-width: 640px) {
+      @include responsive(xs) {
+        width: 100%;
+        justify-content: space-between;
+
+        span {
+          display: flex;
+        }
+      }
+
+      @include responsive(md) {
+        span {
           display: none;
         }
       }
@@ -89,6 +98,14 @@
           display: none;
         }
       }
+    }
+  }
+
+  @include responsive(xs) {
+    .headerContent {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
     }
   }
 }
@@ -131,7 +148,7 @@
   // max-width: 1280px;
   // margin: 0 auto;
   // padding: 2rem 1.5rem;
-  @include centered ($max-width, 1.5rem);
+  @include centered($max-width, 1.5rem);
 }
 
 .loading {
