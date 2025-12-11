@@ -68,8 +68,16 @@
 .tableWrapper {
   overflow-x: auto;
 
+  @include responsive (md) {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+  }  
+
   table {
     width: 100%;
+    min-width: 640px;
     border-collapse: collapse;
 
     thead {
@@ -178,13 +186,13 @@
       thead tr {
         th {
           font-size: 0.75rem;
-          padding: 0.5rem 0.25rem;
+          padding: 0.5rem;
         }
       }
       tbody tr {
         td {
           font-size: 0.75rem;
-          padding: 0.5rem 0.25rem;
+          padding: 0.5rem;
         }
       }
     }
