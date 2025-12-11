@@ -56,7 +56,8 @@ export default function HomePage() {
     }
   };
 
-  const handleUpdateItem = async (updatedItem: InventoryItem) => {
+  const handleUpdateItem = async (updatedItem: InventoryItem | Omit<InventoryItem, 'id' | 'lastUpdated'>) => {
+    if (!('id' in updatedItem)) return;
     const payload = {
       name: updatedItem.name,
       category: updatedItem.category,

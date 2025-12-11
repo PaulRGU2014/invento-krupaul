@@ -57,7 +57,7 @@ export default function SettingsForm() {
     };
   };
 
-  const [profile, setProfile] = useState<Profile>(() => getProfileDefaults(session?.user));
+  const [profile, setProfile] = useState<Profile>(() => getProfileDefaults(session?.user ?? null));
   const tabs: Tab[] = [
     { id: "profile", label: "Profile" },
     { id: "connected", label: "Connected Accounts" },
@@ -108,7 +108,7 @@ export default function SettingsForm() {
   };
 
   const [notificationPrefs, setNotificationPrefs] = useState<NotificationPreferences>(() =>
-    deriveNotificationPrefs(session?.user)
+    deriveNotificationPrefs(session?.user ?? null)
   );
   const [notificationDirty, setNotificationDirty] = useState(false);
   const lowStockNotifyRef = useRef(false);
@@ -120,9 +120,9 @@ export default function SettingsForm() {
   const NOTICE_ANIMATION_MS = 280;
 
   useEffect(() => {
-    setNotificationPrefs(deriveNotificationPrefs(session?.user));
+    setNotificationPrefs(deriveNotificationPrefs(session?.user ?? null));
     setNotificationDirty(false);
-    setProfile(getProfileDefaults(session?.user));
+    setProfile(getProfileDefaults(session?.user ?? null));
     setEmailLogin((prev) => ({ ...prev, email: session?.user?.email || prev.email }));
     setMessageVisible(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps

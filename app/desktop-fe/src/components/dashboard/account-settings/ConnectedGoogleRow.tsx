@@ -50,7 +50,13 @@ export function ConnectedGoogleRow({ session, supabase, onStatus }: ConnectedGoo
         onStatus("Google is not connected.");
         return;
       }
-      const { error } = await supabase.auth.unlinkIdentity({ provider: 'google', identity_id: googleIdentity?.identity_id });
+      const identityId = googleIdentity.identity_id;
+      if (!identityId) {
+        onStatus("Google identity missing.");
+        return;
+      }
+      const unlinkPayload = { identity_id: identityId } as Parameters<typeof supabase.auth.unlinkIdentity>[0];
+      const { error } = await supabase.auth.unlinkIdentity(unlinkPayload);
       if (error) throw error;
       onStatus("Google disconnected.");
       // Attempt to refresh the session so UI updates immediately
