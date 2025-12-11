@@ -55,26 +55,31 @@
     align-items: center;
     gap: 1rem;
 
+    @include responsive(md) {
+      .userInfo {
+        span {
+          display: none;
+        }
+      }
+    }
+
+    @include responsive(xs) {
+      width: 100%;
+      justify-content: space-between;
+      .userInfo {
+        width: 100%;
+        justify-content: space-between;
+        span {
+          display: flex;
+        }
+      }
+    }
+
     .userInfo {
       display: flex;
       align-items: center;
       gap: 0.5rem;
       color: #374151;
-
-      @include responsive(xs) {
-        width: 100%;
-        justify-content: space-between;
-
-        span {
-          display: flex;
-        }
-      }
-
-      @include responsive(md) {
-        span {
-          display: none;
-        }
-      }
     }
 
     .logoutButton {
@@ -94,7 +99,7 @@
       }
 
       span {
-        @media (max-width: 640px) {
+        @include responsive(md) {
           display: none;
         }
       }
