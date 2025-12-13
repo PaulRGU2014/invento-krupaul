@@ -35,6 +35,9 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
   const [scanning, setScanning] = useState(false);
   const [lookupLoading, setLookupLoading] = useState(false);
   const [lookupError, setLookupError] = useState<string | null>(null);
+  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string | undefined>(undefined);
+  const [cameraNotice, setCameraNotice] = useState<string | null>(null);
 
   useEffect(() => {
     if (item) {
@@ -112,12 +115,39 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
     };
   }, []);
 
+  useEffect(() => {
+    const loadDevices = async () => {
+      try {
+        if (typeof navigator === 'undefined' || !navigator.mediaDevices) return;
+        // Prompt for permission to get accurate labels and device list
+        try {
+          await navigator.mediaDevices.getUserMedia({ video: true });
+        } catch {}
+        const list = await reader.listVideoInputDevices();
+        setDevices(list);
+        // Prefer back-facing camera on mobile by label heuristic
+        const preferred = list.find(d => /back|rear|environment/i.test(d.label)) || list[0];
+        setSelectedDeviceId(preferred?.deviceId);
+      } catch (e) {
+        // silently ignore; UI will still allow manual UPC entry
+      }
+    };
+    loadDevices();
+  }, [reader]);
+
   const startScanner = async () => {
     setLookupError(null);
     try {
+      // Check for secure context: camera requires HTTPS or localhost
+      const isSecure = typeof window !== 'undefined' && (window.isSecureContext || window.location.hostname === 'localhost');
+      if (!isSecure) {
+        setCameraNotice('Camera requires HTTPS or localhost. Please use https:// or run locally.');
+        return;
+      }
+      if (!videoRef.current) return;
       setScanning(true);
       const controls = await reader.decodeFromVideoDevice(
-        undefined,
+        selectedDeviceId,
         videoRef.current!,
         (result: Result | undefined, err: unknown, controlsInstance: IScannerControls | undefined) => {
           controlsRef.current = controlsInstance || null;
@@ -208,12 +238,23 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
             </div>
             {scanning && (
               <div className={styles.scanner}>
-                <video ref={videoRef} className={styles.scannerVideo} muted playsInline />
+                <video ref={videoRef} className={styles.scannerVideo} muted playsInline autoPlay />
+              </div>
+            )}
+            {devices.length > 0 && (
+              <div className={styles.deviceRow}>
+                <label htmlFor="device">Camera</label>
+                <select id="device" value={selectedDeviceId || ''} onChange={(e) => setSelectedDeviceId(e.target.value || undefined)}>
+                  {devices.map(d => (
+                    <option key={d.deviceId} value={d.deviceId}>{d.label || `Camera ${d.deviceId.slice(0,6)}`}</option>
+                  ))}
+                </select>
               </div>
             )}
             <p className={styles.hint}>
               <span className={styles.badge}>New</span> Use your camera to scan barcodes or enter the UPC manually to autofill fields.
             </p>
+            {cameraNotice && <p className={styles.hint} style={{ color: '#7c3aed' }}>{cameraNotice}</p>}
             {lookupError && <p className={styles.hint} style={{ color: '#b91c1c' }}>{lookupError}</p>}
           </div>
 

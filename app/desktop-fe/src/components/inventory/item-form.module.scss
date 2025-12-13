@@ -132,6 +132,17 @@
   background: #000;
 }
 
+.deviceRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+
+  select {
+    flex: 1;
+  }
+}
+
 .hint {
   margin-top: 0.25rem;
   font-size: 0.825rem;
