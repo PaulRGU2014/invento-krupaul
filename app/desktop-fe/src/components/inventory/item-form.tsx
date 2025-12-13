@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { InventoryItem } from '@/types/inventory';
 import { lookupByUpc } from '@/lib/inventory-api';
 import { Camera, Loader2, ScanLine, X } from 'lucide-react';
 import { BrowserMultiFormatReader, IScannerControls, Result } from '@zxing/browser';
+import { DecodeHintType, BarcodeFormat } from '@zxing/library';
 import styles from './item-form.module.scss';
 
 interface ItemFormProps {
@@ -19,7 +21,21 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const controlsRef = useRef<IScannerControls | null>(null);
-  const reader = useMemo(() => new BrowserMultiFormatReader(), []);
+  const reader = useMemo(() => {
+    const r = new BrowserMultiFormatReader();
+    // Improve detection reliability for UPC/EAN by trying harder and limiting formats
+    const hints = new Map();
+    hints.set(DecodeHintType.TRY_HARDER, true);
+    hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+      BarcodeFormat.EAN_13,
+      BarcodeFormat.EAN_8,
+      BarcodeFormat.UPC_A,
+      BarcodeFormat.UPC_E,
+      BarcodeFormat.CODE_128,
+    ]);
+    r.setHints(hints as unknown as Map<DecodeHintType, unknown>);
+    return r;
+  }, []);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -33,6 +49,7 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
 
   const [upcValue, setUpcValue] = useState('');
   const [scanning, setScanning] = useState(false);
+  const [showScannerModal, setShowScannerModal] = useState(false);
   const [lookupLoading, setLookupLoading] = useState(false);
   const [lookupError, setLookupError] = useState<string | null>(null);
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
@@ -135,37 +152,60 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
     loadDevices();
   }, [reader]);
 
-  const startScanner = async () => {
+  const startScanner = () => {
     setLookupError(null);
-    try {
-      // Check for secure context: camera requires HTTPS or localhost
-      const isSecure = typeof window !== 'undefined' && (window.isSecureContext || window.location.hostname === 'localhost');
-      if (!isSecure) {
-        setCameraNotice('Camera requires HTTPS or localhost. Please use https:// or run locally.');
-        return;
-      }
-      if (!videoRef.current) return;
-      setScanning(true);
-      const controls = await reader.decodeFromVideoDevice(
-        selectedDeviceId,
-        videoRef.current!,
-        (result: Result | undefined, err: unknown, controlsInstance: IScannerControls | undefined) => {
-          controlsRef.current = controlsInstance || null;
-          if (result?.getText()) {
-            const code = result.getText();
-            setUpcValue(code);
-            stopScanner();
-            handleLookup(code);
-          }
-        }
-      );
-      controlsRef.current = controls;
-    } catch (error: unknown) {
-      console.error('Scanner error', error);
-      setLookupError('Unable to start camera. Please allow camera access or try manual entry.');
-      setScanning(false);
+    // Check for secure context: camera requires HTTPS or localhost
+    const isSecure = typeof window !== 'undefined' && (window.isSecureContext || window.location.hostname === 'localhost');
+    if (!isSecure) {
+      setCameraNotice('Camera requires HTTPS or localhost. Please use https:// or run locally.');
+      return;
     }
+    setScanning(true);
+    setShowScannerModal(true);
   };
+
+  useEffect(() => {
+    const runScanner = async () => {
+      if (!showScannerModal || !videoRef.current) return;
+      try {
+        // Prefer explicit constraints; deviceId when chosen, else environment facing
+        const constraints: MediaStreamConstraints = selectedDeviceId
+          ? { video: { deviceId: { exact: selectedDeviceId }, width: { ideal: 1280 }, height: { ideal: 720 } } }
+          : { video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } } };
+
+        const controls = await reader.decodeFromConstraints(
+          constraints,
+          videoRef.current,
+          (result: Result | undefined, err: unknown, controlsInstance: IScannerControls | undefined) => {
+            controlsRef.current = controlsInstance || null;
+            if (result?.getText()) {
+              const code = result.getText();
+              setUpcValue(code);
+              setShowScannerModal(false);
+              stopScanner();
+              handleLookup(code);
+            }
+          }
+        );
+        controlsRef.current = controls;
+      } catch (error: unknown) {
+        console.error('Scanner error', error);
+        const msg = (error instanceof Error && error.name === 'NotAllowedError')
+          ? 'Camera permissions denied. Please allow camera access in your browser settings.'
+          : 'Unable to start camera. Please allow camera access or try manual entry.';
+        setLookupError(msg);
+        setScanning(false);
+        setShowScannerModal(false);
+      }
+    };
+    runScanner();
+    // Cleanup on modal close
+    return () => {
+      if (!showScannerModal) {
+        stopScanner();
+      }
+    };
+  }, [showScannerModal, selectedDeviceId, reader]);
 
   const handleLookup = async (code?: string) => {
     const upc = (code ?? upcValue).trim();
@@ -236,11 +276,7 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
                 Lookup
               </button>
             </div>
-            {scanning && (
-              <div className={styles.scanner}>
-                <video ref={videoRef} className={styles.scannerVideo} muted playsInline autoPlay />
-              </div>
-            )}
+            {/* Modal is used for camera preview */}
             {devices.length > 0 && (
               <div className={styles.deviceRow}>
                 <label htmlFor="device">Camera</label>
@@ -387,6 +423,38 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
             This helps you reorder items before they run out.
           </p>
         </div>
+      )}
+
+      {showScannerModal && typeof window !== 'undefined' && createPortal(
+        (
+          <div className={styles.modalBackdrop} role="dialog" aria-modal="true" aria-label="Scan barcode" style={{ zIndex: 9999 }}>
+            <div className={styles.modalCard}>
+              <div className={styles.modalHeader}>
+                <h3>Scan Barcode</h3>
+                <button type="button" className={styles.closeButtonSmall} onClick={() => { setShowScannerModal(false); stopScanner(); }}>Close</button>
+              </div>
+              <div className={styles.modalBody}>
+                <video ref={videoRef} className={styles.modalVideo} muted playsInline autoPlay />
+                {devices.length > 0 && (
+                  <div className={styles.deviceRow}>
+                    <label htmlFor="modal-device">Camera</label>
+                    <select id="modal-device" value={selectedDeviceId || ''} onChange={(e) => setSelectedDeviceId(e.target.value || undefined)}>
+                      {devices.map(d => (
+                        <option key={d.deviceId} value={d.deviceId}>{d.label || `Camera ${d.deviceId.slice(0,6)}`}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                {lookupError && <p className={styles.hint} style={{ color: '#b91c1c' }}>{lookupError}</p>}
+                {cameraNotice && <p className={styles.hint} style={{ color: '#7c3aed' }}>{cameraNotice}</p>}
+              </div>
+              <div className={styles.modalFooter}>
+                <button type="button" className={styles.closeButtonSmall} onClick={() => { setShowScannerModal(false); stopScanner(); }}>Cancel</button>
+              </div>
+            </div>
+          </div>
+        ),
+        document.body
       )}
     </div>
   );
