@@ -4,11 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "i18n:translate:th": "node ./scripts/translate-missing.js",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
+    "@google-cloud/translate": "^8.0.0",
     "@zxing/browser": "^0.1.4",
     "@supabase/supabase-js": "^2.45.4",
     "bcryptjs": "^3.0.3",

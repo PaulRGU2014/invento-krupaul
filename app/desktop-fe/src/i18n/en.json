@@ -1,0 +1,255 @@
+{
+  "app": {
+    "title": "Invento",
+    "language": "Language",
+    "english": "English",
+    "thai": "Thai"
+  },
+  "home": {
+    "welcome": "Inventory Manager",
+    "intro": "Track and manage your stock",
+    "nav": {
+      "dashboard": "Dashboard",
+      "inventory": "Inventory",
+      "addItem": "Add Item",
+      "editItem": "Edit Item",
+      "settings": "Settings",
+      "logout": "Logout"
+    }
+  },
+  "login": {
+    "title": "Sign in",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign in",
+    "manager": "Inventory Manager",
+    "subtitle": "Sign in to your account",
+    "placeholderEmail": "you@example.com",
+    "placeholderPassword": "Enter your password",
+    "buttonLogin": "Login",
+    "orContinue": "Or continue with",
+    "continueGoogle": "Continue with Google",
+    "redirecting": "Redirecting...",
+    "signupCta": "Don't have an account? Sign up"
+  },
+  "signup": {
+    "title": "Create your account",
+    "subtitle": "Start managing inventory",
+    "fullName": "Full Name",
+    "confirmPassword": "Confirm Password",
+    "placeholderName": "Jane Doe",
+    "placeholderEmail": "you@example.com",
+    "placeholderCreatePassword": "Create a password",
+    "placeholderRepeatPassword": "Repeat your password",
+    "passwordMismatch": "Passwords do not match",
+    "passwordsMustMatch": "Passwords must match.",
+    "creating": "Creating...",
+    "buttonSignup": "Sign up",
+    "orContinue": "Or continue with",
+    "continueGoogle": "Continue with Google",
+    "backToLogin": "Back to login"
+  },
+  
+  "inventory": {
+    "filters": {
+      "searchPlaceholder": "Search items or suppliers...",
+      "allCategories": "All Categories",
+      "allStock": "All Stock Levels",
+      "lowStockOnly": "Low Stock Only"
+    },
+    "table": {
+      "item": "Item",
+      "category": "Category",
+      "quantity": "Quantity",
+      "minStock": "Min Stock",
+      "unitPrice": "Unit Price",
+      "totalValue": "Total Value",
+      "supplier": "Supplier",
+      "actions": "Actions",
+      "empty": "No items found matching your filters",
+      "edit": "Edit item",
+      "delete": "Delete item",
+      "confirmDelete": "Are you sure you want to delete {name}?"
+    },
+    "summary": {
+      "showing": "Showing Items",
+      "totalQty": "Total Quantity",
+      "totalValue": "Total Value",
+      "units": "units"
+    },
+    "form": {
+      "headerAdd": "Add New Item",
+      "headerEdit": "Edit Item",
+      "barcode": "Barcode / UPC",
+      "scanOrEnter": "Scan or enter UPC",
+      "scan": "Scan",
+      "stop": "Stop",
+      "lookup": "Lookup",
+      "camera": "Camera",
+      "hintNew": "New",
+      "hintScan": "Use your camera to scan barcodes or enter the UPC manually to autofill fields.",
+      "name": "Item Name *",
+      "category": "Category *",
+      "quantity": "Quantity *",
+      "unit": "Unit *",
+      "minStock": "Minimum Stock Level *",
+      "price": "Unit Price ($) *",
+      "supplier": "Supplier *",
+      "placeholderName": "e.g., Tomatoes",
+      "placeholderCategory": "e.g., Vegetables",
+      "placeholderSupplier": "e.g., Fresh Farms Co.",
+      "cancel": "Cancel",
+      "update": "Update Item",
+      "add": "Add Item",
+      "tipLabel": "Tip:",
+      "tipText": "Set the minimum stock level to get alerts when inventory runs low. This helps you reorder items before they run out.",
+      "modalScanTitle": "Scan Barcode",
+      "close": "Close",
+      "cameraNotice": "Camera requires HTTPS or localhost. Please use https:// or run locally.",
+      "cameraDenied": "Camera permissions denied. Please allow camera access in your browser settings.",
+      "cameraUnable": "Unable to start camera. Please allow camera access or try manual entry.",
+      "barcodeNotFound": "Barcode not found",
+      "lookupFailed": "Lookup failed. Please try again."
+    },
+    "units": {
+      "kg": "Kilograms (kg)",
+      "g": "Grams (g)",
+      "liters": "Liters",
+      "ml": "Milliliters (ml)",
+      "pieces": "Pieces",
+      "boxes": "Boxes",
+      "cans": "Cans",
+      "bottles": "Bottles"
+    }
+  },
+  "dashboard": {
+    "stats": {
+      "totalItems": "Total Items",
+      "lowStock": "Low Stock Alerts",
+      "totalValue": "Total Value",
+      "categories": "Categories"
+    },
+    "lowStock": {
+      "title": "Low Stock Alerts",
+      "empty": "No items running low on stock",
+      "min": "Min: {count}"
+    },
+    "byCategory": {
+      "title": "Inventory by Category",
+      "items": "items"
+    },
+    "recent": {
+      "title": "Recently Updated",
+      "item": "Item",
+      "category": "Category",
+      "quantity": "Quantity",
+      "value": "Value",
+      "lastUpdated": "Last Updated"
+    }
+  }
+  ,
+  "settings": {
+    "title": "Account Settings",
+    "subtitle": "Manage your account settings and preferences",
+    "chooseSection": "Choose settings section",
+    "tabs": {
+      "profile": "Profile",
+      "connected": "Connected Accounts",
+      "security": "Security",
+      "preferences": "Preferences",
+      "notifications": "Notifications"
+    },
+    "notice": {
+      "dismiss": "Dismiss notification"
+    },
+    "profile": {
+      "name": "Name",
+      "placeholderName": "Your name",
+      "save": "Save Profile",
+      "saved": "Profile saved",
+      "saveFailed": "Failed to update profile"
+    },
+    "avatar": {
+      "title": "Avatar",
+      "description": "Upload or change your profile picture (placeholder).",
+      "upload": "Upload"
+    },
+    "connected": {
+      "title": "Connected Accounts",
+      "description": "Manage external login providers linked to your account.",
+      "emailPass": "Email & Password",
+      "emailPassDescription": "Set up or update a password login for this account.",
+      "statusLabel": "Status:",
+      "connected": "Connected",
+      "notConnected": "Not connected",
+      "updateLogin": "Update login",
+      "addEmailLogin": "Add email login",
+      "facebook": "Facebook",
+      "connect": "Connect",
+      "disconnect": "Disconnect",
+      "loginUpdated": "Login updated",
+      "emailAdded": "Email login added",
+      "emailUpdateFailed": "Failed to update email login",
+      "google": {
+        "label": "Google",
+        "already": "Google already connected.",
+        "redirecting": "Redirecting to Google OAuth…",
+        "failedStart": "Failed to start Google connect",
+        "notConnected": "Google is not connected.",
+        "identityMissing": "Google identity missing.",
+        "disconnected": "Google disconnected.",
+        "failedDisconnect": "Failed to disconnect Google"
+      }
+    },
+    "security": {
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmNewPassword": "Confirm New Password",
+      "changePassword": "Change Password",
+      "passwordSaved": "Password saved",
+      "passwordFailed": "Failed to change password"
+    },
+    "preferences": {
+      "theme": "Theme",
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark",
+      "save": "Save Preferences",
+      "saved": "Preferences saved",
+      "saveFailed": "Failed to save preferences"
+    },
+    "notifications": {
+      "aria": "Notification preferences",
+      "intro": "Choose how you want to be notified. We recommend keeping at least one channel on.",
+      "enable": "Enable notifications",
+      "enableDesc": "Master switch for all notifications.",
+      "web": "Web notifications",
+      "webDesc": "Show alerts in your browser.",
+      "granted": "Granted",
+      "enableAction": "Enable",
+      "email": "Email notifications",
+      "emailDesc": "Receive updates in your inbox.",
+      "sms": "SMS alerts",
+      "smsDesc": "Send important alerts via text.",
+      "product": "Product updates",
+      "productDesc": "Get tips, announcements, and new feature highlights.",
+      "lowStock": "Low stock alerts",
+      "lowStockDesc": "Notify when items fall below threshold.",
+      "cadence": "Notification cadence",
+      "frequency": {
+        "immediate": "Immediate",
+        "hourly": "Hourly digest",
+        "daily": "Daily digest",
+        "weekly": "Weekly digest"
+      },
+      "saving": "Saving notifications…",
+      "saved": "Notifications saved",
+      "saveFailed": "Failed to save notifications"
+    }
+  },
+  "common": {
+    "saving": "Saving…",
+    "signupFailed": "Signup failed",
+    "networkError": "Network error"
+  }
+}

@@ -1,7 +1,9 @@
+"use client";
 // Preferences tab for account settings
 import React from "react";
 import styles from "./account-settings.module.scss";
 import { Preferences } from "./SettingsForm.types";
+import { useI18n } from "@/lib/i18n";
 
 interface PreferencesTabProps {
   preferences: Preferences;
@@ -11,12 +13,13 @@ interface PreferencesTabProps {
 }
 
 export function PreferencesTab(props: PreferencesTabProps) {
+  const { t } = useI18n();
   return (
     <section className={styles.card}>
-      <h2 className={styles.cardTitle}>Preferences</h2>
+      <h2 className={styles.cardTitle}>{t('settings.tabs.preferences', 'Preferences')}</h2>
       <form onSubmit={props.onSavePreferences} className={styles.gridGap}>
         <div>
-          <label className={styles.label}>Theme</label>
+          <label className={styles.label}>{t('settings.preferences.theme', 'Theme')}</label>
           <select
             className={styles.select}
             value={props.preferences.theme}
@@ -24,14 +27,14 @@ export function PreferencesTab(props: PreferencesTabProps) {
               props.setPreferences({ ...props.preferences, theme: e.target.value as Preferences["theme"] })
             }
           >
-            <option value="system">System</option>
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
+            <option value="system">{t('settings.preferences.system', 'System')}</option>
+            <option value="light">{t('settings.preferences.light', 'Light')}</option>
+            <option value="dark">{t('settings.preferences.dark', 'Dark')}</option>
           </select>
         </div>
         <div className={styles.actions}>
           <button className={styles.button} type="submit" disabled={props.saving}>
-            {props.saving ? "Saving…" : "Save Preferences"}
+            {props.saving ? t('common.saving', 'Saving…') : t('settings.preferences.save', 'Save Preferences')}
           </button>
         </div>
       </form>

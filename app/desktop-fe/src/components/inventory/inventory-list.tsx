@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { InventoryItem } from '@/types/inventory';
 import { Search, Edit2, Trash2, AlertTriangle } from 'lucide-react';
 import styles from './inventory-list.module.scss';
+import { useI18n } from '@/lib/i18n';
 
 interface InventoryListProps {
   items: InventoryItem[];
@@ -13,6 +14,7 @@ interface InventoryListProps {
 }
 
 export function InventoryList({ items, onEdit, onDelete, onInlineUpdate }: InventoryListProps) {
+  const { t } = useI18n();
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [stockFilter, setStockFilter] = useState<'all' | 'low'>('all');
@@ -88,7 +90,7 @@ export function InventoryList({ items, onEdit, onDelete, onInlineUpdate }: Inven
             <Search className={styles.searchIcon} size={20} />
             <input
               type="text"
-              placeholder="Search items or suppliers..."
+              placeholder={t('inventory.filters.searchPlaceholder', 'Search items or suppliers...')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -101,7 +103,7 @@ export function InventoryList({ items, onEdit, onDelete, onInlineUpdate }: Inven
           >
             {categories.map(cat => (
               <option key={cat} value={cat}>
-                {cat === 'all' ? 'All Categories' : cat}
+                {cat === 'all' ? t('inventory.filters.allCategories', 'All Categories') : cat}
               </option>
             ))}
           </select>
@@ -111,8 +113,8 @@ export function InventoryList({ items, onEdit, onDelete, onInlineUpdate }: Inven
             onChange={(e) => setStockFilter(e.target.value as 'all' | 'low')}
             className={styles.select}
           >
-            <option value="all">All Stock Levels</option>
-            <option value="low">Low Stock Only</option>
+            <option value="all">{t('inventory.filters.allStock', 'All Stock Levels')}</option>
+            <option value="low">{t('inventory.filters.lowStockOnly', 'Low Stock Only')}</option>
           </select>
         </div>
       </div>
@@ -123,21 +125,21 @@ export function InventoryList({ items, onEdit, onDelete, onInlineUpdate }: Inven
           <table>
             <thead>
               <tr>
-                <th>Item</th>
-                <th>Category</th>
-                <th>Quantity</th>
-                <th>Min Stock</th>
-                <th>Unit Price</th>
-                <th>Total Value</th>
-                <th>Supplier</th>
-                <th>Actions</th>
+                <th>{t('inventory.table.item', 'Item')}</th>
+                <th>{t('inventory.table.category', 'Category')}</th>
+                <th>{t('inventory.table.quantity', 'Quantity')}</th>
+                <th>{t('inventory.table.minStock', 'Min Stock')}</th>
+                <th>{t('inventory.table.unitPrice', 'Unit Price')}</th>
+                <th>{t('inventory.table.totalValue', 'Total Value')}</th>
+                <th>{t('inventory.table.supplier', 'Supplier')}</th>
+                <th>{t('inventory.table.actions', 'Actions')}</th>
               </tr>
             </thead>
             <tbody>
               {filteredItems.length === 0 ? (
                 <tr>
                   <td colSpan={8} className={styles.emptyState}>
-                    No items found matching your filters
+                    {t('inventory.table.empty', 'No items found matching your filters')}
                   </td>
                 </tr>
               ) : (
@@ -205,18 +207,18 @@ export function InventoryList({ items, onEdit, onDelete, onInlineUpdate }: Inven
                           <button
                             onClick={() => onEdit(item)}
                             className={styles.editButton}
-                            title="Edit item"
+                            title={t('inventory.table.edit', 'Edit item')}
                           >
                             <Edit2 size={18} />
                           </button>
                           <button
                             onClick={() => {
-                              if (window.confirm(`Are you sure you want to delete ${item.name}?`)) {
+                              if (window.confirm(t('inventory.table.confirmDelete', `Are you sure you want to delete {name}?`).replace('{name}', item.name))) {
                                 onDelete(item.id);
                               }
                             }}
                             className={styles.deleteButton}
-                            title="Delete item"
+                            title={t('inventory.table.delete', 'Delete item')}
                           >
                             <Trash2 size={18} />
                           </button>
@@ -235,15 +237,15 @@ export function InventoryList({ items, onEdit, onDelete, onInlineUpdate }: Inven
       <div className={styles.summaryCard}>
         <div className={styles.summaryGrid}>
           <div className={styles.summaryItem}>
-            <p>Showing Items</p>
+            <p>{t('inventory.summary.showing', 'Showing Items')}</p>
             <p>{filteredItems.length}</p>
           </div>
           <div className={styles.summaryItem}>
-            <p>Total Quantity</p>
-            <p>{filteredItems.reduce((sum, item) => sum + item.quantity, 0)} units</p>
+            <p>{t('inventory.summary.totalQty', 'Total Quantity')}</p>
+            <p>{filteredItems.reduce((sum, item) => sum + item.quantity, 0)} {t('inventory.summary.units', 'units')}</p>
           </div>
           <div className={styles.summaryItem}>
-            <p>Total Value</p>
+            <p>{t('inventory.summary.totalValue', 'Total Value')}</p>
             <p>${filteredItems.reduce((sum, item) => sum + (item.quantity * item.price), 0).toFixed(2)}</p>
           </div>
         </div>

@@ -4,6 +4,7 @@
 import React from "react";
 import styles from "./account-settings.module.scss";
 import { Security } from "./SettingsForm.types";
+import { useI18n } from "@/lib/i18n";
 
 interface SecurityTabProps {
   security: Security;
@@ -13,12 +14,13 @@ interface SecurityTabProps {
 }
 
 export function SecurityTab(props: SecurityTabProps) {
+  const { t } = useI18n();
   return (
     <section className={styles.card}>
-      <h2 className={styles.cardTitle}>Security</h2>
+      <h2 className={styles.cardTitle}>{t('settings.tabs.security', 'Security')}</h2>
       <form onSubmit={props.onChangePassword} className={styles.gridGap}>
         <div>
-          <label className={styles.label}>Current Password</label>
+          <label className={styles.label}>{t('settings.security.currentPassword', 'Current Password')}</label>
           <input
             className={styles.input}
             type="password"
@@ -28,7 +30,7 @@ export function SecurityTab(props: SecurityTabProps) {
           />
         </div>
         <div>
-          <label className={styles.label}>New Password</label>
+          <label className={styles.label}>{t('settings.security.newPassword', 'New Password')}</label>
           <input
             className={styles.input}
             type="password"
@@ -38,7 +40,7 @@ export function SecurityTab(props: SecurityTabProps) {
           />
         </div>
         <div>
-          <label className={styles.label}>Confirm New Password</label>
+          <label className={styles.label}>{t('settings.security.confirmNewPassword', 'Confirm New Password')}</label>
           <input
             className={styles.input}
             type="password"
@@ -49,7 +51,7 @@ export function SecurityTab(props: SecurityTabProps) {
         </div>
         <div className={styles.actions}>
           <button className={styles.button} type="submit" disabled={props.saving}>
-            {props.saving ? "Saving…" : "Change Password"}
+            {props.saving ? t('common.saving', 'Saving…') : t('settings.security.changePassword', 'Change Password')}
           </button>
         </div>
       </form>

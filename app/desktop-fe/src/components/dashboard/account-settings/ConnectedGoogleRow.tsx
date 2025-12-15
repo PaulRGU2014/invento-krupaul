@@ -4,6 +4,7 @@
 import React from "react";
 import { Session, SupabaseClient } from "@supabase/supabase-js";
 import styles from "./account-settings.module.scss";
+import { useI18n } from "@/lib/i18n";
 
 type ConnectedGoogleRowProps = {
   session: Session | null;
@@ -14,6 +15,7 @@ type ConnectedGoogleRowProps = {
 type Identity = { provider?: string; identity_id?: string };
 
 export function ConnectedGoogleRow({ session, supabase, onStatus }: ConnectedGoogleRowProps) {
+  const { t } = useI18n();
   const identities = Array.isArray(session?.user?.identities) ? (session.user.identities as Identity[]) : [];
   const providers = Array.isArray(session?.user?.app_metadata?.providers) ? (session.user.app_metadata.providers as string[]) : [];
   const isConnected = identities.some((id) => id?.provider === 'google') || providers.includes('google') || (!!session?.user?.app_metadata?.provider && session.user.app_metadata.provider === 'google');
@@ -24,7 +26,7 @@ export function ConnectedGoogleRow({ session, supabase, onStatus }: ConnectedGoo
       const origin = typeof window !== 'undefined' ? window.location.origin : undefined;
       const redirectTo = origin ? `${origin}/login` : undefined;
       if (isConnected) {
-        onStatus("Google already connected.");
+        onStatus(t('settings.connected.google.already', 'Google already connected.'));
         return;
       }
       if (session) {
@@ -35,9 +37,9 @@ export function ConnectedGoogleRow({ session, supabase, onStatus }: ConnectedGoo
         if (error) throw error;
       }
       // Supabase will redirect; if using PKCE without redirect, handle accordingly.
-      onStatus("Redirecting to Google OAuth…");
+      onStatus(t('settings.connected.google.redirecting', 'Redirecting to Google OAuth…'));
     } catch (err: unknown) {
-      onStatus(err instanceof Error ? err.message : "Failed to start Google connect");
+      onStatus(err instanceof Error ? err.message : t('settings.connected.google.failedStart', 'Failed to start Google connect'));
     }
   };
 
@@ -47,24 +49,24 @@ export function ConnectedGoogleRow({ session, supabase, onStatus }: ConnectedGoo
       const identitiesForDisconnect: Identity[] = (session?.user?.identities as Identity[]) || [];
       const googleIdentity = identitiesForDisconnect.find((i) => i?.provider === 'google');
       if (!googleIdentity) {
-        onStatus("Google is not connected.");
+        onStatus(t('settings.connected.google.notConnected', 'Google is not connected.'));
         return;
       }
       const identityId = googleIdentity.identity_id;
       if (!identityId) {
-        onStatus("Google identity missing.");
+        onStatus(t('settings.connected.google.identityMissing', 'Google identity missing.'));
         return;
       }
       const unlinkPayload = { identity_id: identityId } as Parameters<typeof supabase.auth.unlinkIdentity>[0];
       const { error } = await supabase.auth.unlinkIdentity(unlinkPayload);
       if (error) throw error;
-      onStatus("Google disconnected.");
+      onStatus(t('settings.connected.google.disconnected', 'Google disconnected.'));
       // Attempt to refresh the session so UI updates immediately
       try {
         await supabase.auth.refreshSession();
       } catch {}
     } catch (err: unknown) {
-      onStatus(err instanceof Error ? err.message : "Failed to disconnect Google");
+      onStatus(err instanceof Error ? err.message : t('settings.connected.google.failedDisconnect', 'Failed to disconnect Google'));
     }
   };
 
@@ -79,15 +81,15 @@ export function ConnectedGoogleRow({ session, supabase, onStatus }: ConnectedGoo
             </g>
           </svg>
         </span>
-        <label className={styles.label}>Google</label>
+        <label className={styles.label}>{t('settings.connected.google.label', 'Google')}</label>
       </div>
       <div className={styles.actions}>
         <button className={styles.button} type="button" onClick={connectGoogle} disabled={isConnected}>
-          {isConnected ? "Connected" : "Connect"}
+          {isConnected ? t('settings.connected.connected', 'Connected') : t('settings.connected.connect', 'Connect')}
         </button>
         {isConnected && (
           <button className={styles.button} type="button" onClick={disconnectGoogle}>
-            Disconnect
+            {t('settings.connected.disconnect', 'Disconnect')}
           </button>
         )}
       </div>

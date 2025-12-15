@@ -8,6 +8,7 @@ import { Camera, Loader2, ScanLine, X } from 'lucide-react';
 import { BrowserMultiFormatReader, IScannerControls, Result } from '@zxing/browser';
 import { DecodeHintType, BarcodeFormat } from '@zxing/library';
 import styles from './item-form.module.scss';
+import { useI18n } from '@/lib/i18n';
 
 interface ItemFormProps {
   item: InventoryItem | null;
@@ -16,6 +17,7 @@ interface ItemFormProps {
 }
 
 export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
+  const { t } = useI18n();
   const DISCRETE_UNITS = new Set(['pieces', 'boxes', 'cans', 'bottles']);
   const isDiscreteUnit = (unit: string) => DISCRETE_UNITS.has(unit);
 
@@ -157,7 +159,7 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
     // Check for secure context: camera requires HTTPS or localhost
     const isSecure = typeof window !== 'undefined' && (window.isSecureContext || window.location.hostname === 'localhost');
     if (!isSecure) {
-      setCameraNotice('Camera requires HTTPS or localhost. Please use https:// or run locally.');
+      setCameraNotice(t('inventory.form.cameraNotice', 'Camera requires HTTPS or localhost. Please use https:// or run locally.'));
       return;
     }
     setScanning(true);
@@ -191,8 +193,8 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
       } catch (error: unknown) {
         console.error('Scanner error', error);
         const msg = (error instanceof Error && error.name === 'NotAllowedError')
-          ? 'Camera permissions denied. Please allow camera access in your browser settings.'
-          : 'Unable to start camera. Please allow camera access or try manual entry.';
+          ? t('inventory.form.cameraDenied', 'Camera permissions denied. Please allow camera access in your browser settings.')
+          : t('inventory.form.cameraUnable', 'Unable to start camera. Please allow camera access or try manual entry.');
         setLookupError(msg);
         setScanning(false);
         setShowScannerModal(false);
@@ -215,7 +217,7 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
     try {
       const res = await lookupByUpc(upc);
       if (!res?.success) {
-        setLookupError(res?.error || 'Barcode not found');
+        setLookupError(res?.error || t('inventory.form.barcodeNotFound', 'Barcode not found'));
         return;
       }
       const data = res.data || {};
@@ -227,7 +229,7 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
       }));
     } catch (error: unknown) {
       console.error('UPC lookup failed', error);
-      setLookupError('Lookup failed. Please try again.');
+      setLookupError(t('inventory.form.lookupFailed', 'Lookup failed. Please try again.'));
     } finally {
       setLookupLoading(false);
     }
@@ -237,7 +239,7 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
     <div className={styles.wrapper}>
       <div className={styles.card}>
         <div className={styles.header}>
-          <h2>{item ? 'Edit Item' : 'Add New Item'}</h2>
+          <h2>{item ? t('inventory.form.headerEdit', 'Edit Item') : t('inventory.form.headerAdd', 'Add New Item')}</h2>
           {item && (
             <button onClick={onCancel} className={styles.closeButton}>
               <X size={20} />
@@ -247,7 +249,7 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
 
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGroup}>
-            <label htmlFor="barcode">Barcode / UPC</label>
+            <label htmlFor="barcode">{t('inventory.form.barcode', 'Barcode / UPC')}</label>
             <div className={styles.scanRow}>
               <input
                 type="text"
@@ -255,7 +257,7 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
                 name="barcode"
                 value={upcValue}
                 onChange={(e) => setUpcValue(e.target.value)}
-                placeholder="Scan or enter UPC"
+                placeholder={t('inventory.form.scanOrEnter', 'Scan or enter UPC')}
                 inputMode="numeric"
               />
               <button
@@ -264,7 +266,7 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
                 className={styles.scanButton}
               >
                 {scanning ? <Loader2 size={16} className={styles.spin} /> : <Camera size={16} />}
-                {scanning ? 'Stop' : 'Scan'}
+                {scanning ? t('inventory.form.stop', 'Stop') : t('inventory.form.scan', 'Scan')}
               </button>
               <button
                 type="button"
@@ -273,13 +275,13 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
                 disabled={lookupLoading}
               >
                 {lookupLoading ? <Loader2 size={16} className={styles.spin} /> : <ScanLine size={16} />}
-                Lookup
+                {t('inventory.form.lookup', 'Lookup')}
               </button>
             </div>
             {/* Modal is used for camera preview */}
             {devices.length > 0 && (
               <div className={styles.deviceRow}>
-                <label htmlFor="device">Camera</label>
+                <label htmlFor="device">{t('inventory.form.camera', 'Camera')}</label>
                 <select id="device" value={selectedDeviceId || ''} onChange={(e) => setSelectedDeviceId(e.target.value || undefined)}>
                   {devices.map(d => (
                     <option key={d.deviceId} value={d.deviceId}>{d.label || `Camera ${d.deviceId.slice(0,6)}`}</option>
@@ -288,7 +290,7 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
               </div>
             )}
             <p className={styles.hint}>
-              <span className={styles.badge}>New</span> Use your camera to scan barcodes or enter the UPC manually to autofill fields.
+              <span className={styles.badge}>{t('inventory.form.hintNew', 'New')}</span> {t('inventory.form.hintScan', 'Use your camera to scan barcodes or enter the UPC manually to autofill fields.')}
             </p>
             {cameraNotice && <p className={styles.hint} style={{ color: '#7c3aed' }}>{cameraNotice}</p>}
             {lookupError && <p className={styles.hint} style={{ color: '#b91c1c' }}>{lookupError}</p>}
@@ -296,7 +298,7 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
 
           <div className={styles.formGrid}>
             <div className={styles.formGroup}>
-              <label htmlFor="name">Item Name *</label>
+              <label htmlFor="name">{t('inventory.form.name', 'Item Name *')}</label>
               <input
                 type="text"
                 id="name"
@@ -304,12 +306,12 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
                 required
                 value={formData.name}
                 onChange={handleChange}
-                placeholder="e.g., Tomatoes"
+                placeholder={t('inventory.form.placeholderName', 'e.g., Tomatoes')}
               />
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="category">Category *</label>
+              <label htmlFor="category">{t('inventory.form.category', 'Category *')}</label>
               <input
                 type="text"
                 id="category"
@@ -317,12 +319,12 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
                 required
                 value={formData.category}
                 onChange={handleChange}
-                placeholder="e.g., Vegetables"
+                placeholder={t('inventory.form.placeholderCategory', 'e.g., Vegetables')}
               />
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="quantity">Quantity *</label>
+              <label htmlFor="quantity">{t('inventory.form.quantity', 'Quantity *')}</label>
               <input
                 type="number"
                 id="quantity"
@@ -337,7 +339,7 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="unit">Unit *</label>
+              <label htmlFor="unit">{t('inventory.form.unit', 'Unit *')}</label>
               <select
                 id="unit"
                 name="unit"
@@ -345,19 +347,19 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
                 value={formData.unit}
                 onChange={handleChange}
               >
-                <option value="kg">Kilograms (kg)</option>
-                <option value="g">Grams (g)</option>
-                <option value="liters">Liters</option>
-                <option value="ml">Milliliters (ml)</option>
-                <option value="pieces">Pieces</option>
-                <option value="boxes">Boxes</option>
-                <option value="cans">Cans</option>
-                <option value="bottles">Bottles</option>
+                <option value="kg">{t('inventory.units.kg', 'Kilograms (kg)')}</option>
+                <option value="g">{t('inventory.units.g', 'Grams (g)')}</option>
+                <option value="liters">{t('inventory.units.liters', 'Liters')}</option>
+                <option value="ml">{t('inventory.units.ml', 'Milliliters (ml)')}</option>
+                <option value="pieces">{t('inventory.units.pieces', 'Pieces')}</option>
+                <option value="boxes">{t('inventory.units.boxes', 'Boxes')}</option>
+                <option value="cans">{t('inventory.units.cans', 'Cans')}</option>
+                <option value="bottles">{t('inventory.units.bottles', 'Bottles')}</option>
               </select>
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="minStock">Minimum Stock Level *</label>
+              <label htmlFor="minStock">{t('inventory.form.minStock', 'Minimum Stock Level *')}</label>
               <input
                 type="number"
                 id="minStock"
@@ -372,7 +374,7 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="price">Unit Price ($) *</label>
+              <label htmlFor="price">{t('inventory.form.price', 'Unit Price ($) *')}</label>
               <input
                 type="number"
                 id="price"
@@ -386,7 +388,7 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
             </div>
 
             <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-              <label htmlFor="supplier">Supplier *</label>
+              <label htmlFor="supplier">{t('inventory.form.supplier', 'Supplier *')}</label>
               <input
                 type="text"
                 id="supplier"
@@ -394,7 +396,7 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
                 required
                 value={formData.supplier}
                 onChange={handleChange}
-                placeholder="e.g., Fresh Farms Co."
+                placeholder={t('inventory.form.placeholderSupplier', 'e.g., Fresh Farms Co.')}
               />
             </div>
           </div>
@@ -406,11 +408,11 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
                 onClick={onCancel}
                 className={styles.cancelButton}
               >
-                Cancel
+                {t('inventory.form.cancel', 'Cancel')}
               </button>
             )}
             <button type="submit" className={styles.submitButton}>
-              {item ? 'Update Item' : 'Add Item'}
+              {item ? t('inventory.form.update', 'Update Item') : t('inventory.form.add', 'Add Item')}
             </button>
           </div>
         </form>
@@ -419,25 +421,24 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
       {!item && (
         <div className={styles.tip}>
           <p>
-            <span>Tip:</span> Set the minimum stock level to get alerts when inventory runs low. 
-            This helps you reorder items before they run out.
+            <span>{t('inventory.form.tipLabel', 'Tip:')}</span> {t('inventory.form.tipText', 'Set the minimum stock level to get alerts when inventory runs low. This helps you reorder items before they run out.')}
           </p>
         </div>
       )}
 
       {showScannerModal && typeof window !== 'undefined' && createPortal(
         (
-          <div className={styles.modalBackdrop} role="dialog" aria-modal="true" aria-label="Scan barcode" style={{ zIndex: 9999 }}>
+          <div className={styles.modalBackdrop} role="dialog" aria-modal="true" aria-label={t('inventory.form.modalScanTitle', 'Scan Barcode')} style={{ zIndex: 9999 }}>
             <div className={styles.modalCard}>
               <div className={styles.modalHeader}>
-                <h3>Scan Barcode</h3>
-                <button type="button" className={styles.closeButtonSmall} onClick={() => { setShowScannerModal(false); stopScanner(); }}>Close</button>
+                <h3>{t('inventory.form.modalScanTitle', 'Scan Barcode')}</h3>
+                <button type="button" className={styles.closeButtonSmall} onClick={() => { setShowScannerModal(false); stopScanner(); }}>{t('inventory.form.close', 'Close')}</button>
               </div>
               <div className={styles.modalBody}>
                 <video ref={videoRef} className={styles.modalVideo} muted playsInline autoPlay />
                 {devices.length > 0 && (
                   <div className={styles.deviceRow}>
-                    <label htmlFor="modal-device">Camera</label>
+                    <label htmlFor="modal-device">{t('inventory.form.camera', 'Camera')}</label>
                     <select id="modal-device" value={selectedDeviceId || ''} onChange={(e) => setSelectedDeviceId(e.target.value || undefined)}>
                       {devices.map(d => (
                         <option key={d.deviceId} value={d.deviceId}>{d.label || `Camera ${d.deviceId.slice(0,6)}`}</option>
@@ -449,7 +450,7 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
                 {cameraNotice && <p className={styles.hint} style={{ color: '#7c3aed' }}>{cameraNotice}</p>}
               </div>
               <div className={styles.modalFooter}>
-                <button type="button" className={styles.closeButtonSmall} onClick={() => { setShowScannerModal(false); stopScanner(); }}>Cancel</button>
+                <button type="button" className={styles.closeButtonSmall} onClick={() => { setShowScannerModal(false); stopScanner(); }}>{t('inventory.form.cancel', 'Cancel')}</button>
               </div>
             </div>
           </div>

@@ -5,6 +5,7 @@ import React from "react";
 import { Session, SupabaseClient } from "@supabase/supabase-js";
 import styles from "./account-settings.module.scss";
 import { ConnectedGoogleRow } from "./ConnectedGoogleRow";
+import { useI18n } from "@/lib/i18n";
 
 interface ConnectedTabProps {
   session: Session | null;
@@ -19,22 +20,23 @@ interface ConnectedTabProps {
 }
 
 export function ConnectedTab(props: ConnectedTabProps) {
+  const { t } = useI18n();
   return (
     <section className={styles.card}>
-      <h2 className={styles.cardTitle}>Connected Accounts</h2>
+      <h2 className={styles.cardTitle}>{t('settings.connected.title', 'Connected Accounts')}</h2>
       <div className={styles.gridGap}>
-        <p>Manage external login providers linked to your account.</p>
+        <p>{t('settings.connected.description', 'Manage external login providers linked to your account.')}</p>
         <div className={styles.gridGap}>
           <ConnectedGoogleRow session={props.session} supabase={props.supabase} onStatus={props.onStatus} />
           <div className={styles.gridGap}>
-            <label className={styles.label}>Email & Password</label>
-            <p>Set up or update a password login for this account.</p>
+            <label className={styles.label}>{t('settings.connected.emailPass', 'Email & Password')}</label>
+            <p>{t('settings.connected.emailPassDescription', 'Set up or update a password login for this account.')}</p>
             <p style={{ margin: 0, color: '#374151' }}>
-              Status: {props.isEmailConnected ? 'Connected' : 'Not connected'}
+              {t('settings.connected.statusLabel', 'Status:')} {props.isEmailConnected ? t('settings.connected.connected', 'Connected') : t('settings.connected.notConnected', 'Not connected')}
             </p>
             <form onSubmit={props.handleLinkEmailLogin} className={styles.gridGap}>
               <div>
-                <label className={styles.label}>Email</label>
+                <label className={styles.label}>{t('login.email', 'Email')}</label>
                 <input
                   className={styles.input}
                   type="email"
@@ -44,7 +46,7 @@ export function ConnectedTab(props: ConnectedTabProps) {
                 />
               </div>
               <div>
-                <label className={styles.label}>Password</label>
+                <label className={styles.label}>{t('login.password', 'Password')}</label>
                 <input
                   className={styles.input}
                   type="password"
@@ -54,7 +56,7 @@ export function ConnectedTab(props: ConnectedTabProps) {
                 />
               </div>
               <div>
-                <label className={styles.label}>Confirm Password</label>
+                <label className={styles.label}>{t('signup.confirmPassword', 'Confirm Password')}</label>
                 <input
                   className={styles.input}
                   type="password"
@@ -65,17 +67,21 @@ export function ConnectedTab(props: ConnectedTabProps) {
               </div>
               <div className={styles.actions}>
                 <button className={styles.button} type="submit" disabled={props.linkingEmail}>
-                  {props.linkingEmail ? "Saving…" : props.isEmailConnected ? "Update login" : "Add email login"}
+                  {props.linkingEmail
+                    ? t('common.saving', 'Saving…')
+                    : props.isEmailConnected
+                      ? t('settings.connected.updateLogin', 'Update login')
+                      : t('settings.connected.addEmailLogin', 'Add email login')}
                 </button>
               </div>
             </form>
           </div>
           <div>
-            <label className={styles.label}>Facebook</label>
+            <label className={styles.label}>{t('settings.connected.facebook', 'Facebook')}</label>
             <div className={styles.actions}>
-              <button className={styles.button} type="button" disabled>Connect</button>
+              <button className={styles.button} type="button" disabled>{t('settings.connected.connect', 'Connect')}</button>
               {props.isFacebookConnected && (
-                <button className={styles.button} type="button" disabled>Disconnect</button>
+                <button className={styles.button} type="button" disabled>{t('settings.connected.disconnect', 'Disconnect')}</button>
               )}
             </div>
           </div>

@@ -11,6 +11,7 @@ import { ConnectedTab } from "./ConnectedTab";
 import { SecurityTab } from "./SecurityTab";
 import { PreferencesTab } from "./PreferencesTab";
 import { NotificationsTab } from "./NotificationsTab";
+import { useI18n } from "@/lib/i18n";
 
 type Profile = {
   name: string;
@@ -44,6 +45,7 @@ type Tab = { id: TabId; label: string };
 type Identity = { provider?: string };
 
 export default function SettingsForm() {
+  const { t } = useI18n();
   const { profile: ctxProfile, setProfile: setCtxProfile } = useUserProfile();
   // Supabase session first so state initializers can consume it safely
   const { session } = useSupabaseSession();
@@ -59,11 +61,11 @@ export default function SettingsForm() {
 
   const [profile, setProfile] = useState<Profile>(() => getProfileDefaults(session?.user ?? null));
   const tabs: Tab[] = [
-    { id: "profile", label: "Profile" },
-    { id: "connected", label: "Connected Accounts" },
-    { id: "security", label: "Security" },
-    { id: "preferences", label: "Preferences" },
-    { id: "notifications", label: "Notifications" },
+    { id: "profile", label: t('settings.tabs.profile', 'Profile') },
+    { id: "connected", label: t('settings.tabs.connected', 'Connected Accounts') },
+    { id: "security", label: t('settings.tabs.security', 'Security') },
+    { id: "preferences", label: t('settings.tabs.preferences', 'Preferences') },
+    { id: "notifications", label: t('settings.tabs.notifications', 'Notifications') },
   ];
   const [activeTab, setActiveTab] = useState<TabId>("profile");
   const [security, setSecurity] = useState<Security>({
@@ -77,12 +79,12 @@ export default function SettingsForm() {
   const frequencyOptions = useMemo(
     () =>
       ([
-        { value: "immediate", label: "Immediate" },
-        { value: "hourly", label: "Hourly digest" },
-        { value: "daily", label: "Daily digest" },
-        { value: "weekly", label: "Weekly digest" },
+        { value: "immediate", label: t('settings.notifications.frequency.immediate', 'Immediate') },
+        { value: "hourly", label: t('settings.notifications.frequency.hourly', 'Hourly digest') },
+        { value: "daily", label: t('settings.notifications.frequency.daily', 'Daily digest') },
+        { value: "weekly", label: t('settings.notifications.frequency.weekly', 'Weekly digest') },
       ] as const),
-    []
+    [t]
   );
   const notificationDefaults: NotificationPreferences = {
     enabled: true,
@@ -153,9 +155,9 @@ export default function SettingsForm() {
       } catch {}
       // Update local context so header reflects changes immediately
       setCtxProfile({ name: profile.name, email: profile.email });
-      setMessage("Profile saved");
+      setMessage(t('settings.profile.saved', 'Profile saved'));
     } catch {
-      setMessage("Failed to update profile");
+      setMessage(t('settings.profile.saveFailed', 'Failed to update profile'));
     } finally {
       setSaving(false);
     }
@@ -173,10 +175,10 @@ export default function SettingsForm() {
     try {
       // TODO: Integrate with real auth API
       await new Promise((r) => setTimeout(r, 600));
-      setMessage("Password saved");
+      setMessage(t('settings.security.passwordSaved', 'Password saved'));
       setSecurity({ currentPassword: "", newPassword: "", confirmPassword: "" });
     } catch {
-      setMessage("Failed to change password");
+      setMessage(t('settings.security.passwordFailed', 'Failed to change password'));
     } finally {
       setSaving(false);
     }
@@ -189,9 +191,9 @@ export default function SettingsForm() {
     try {
       // TODO: Persist preferences to user settings
       await new Promise((r) => setTimeout(r, 400));
-      setMessage("Preferences saved");
+      setMessage(t('settings.preferences.saved', 'Preferences saved'));
     } catch {
-      setMessage("Failed to save preferences");
+      setMessage(t('settings.preferences.saveFailed', 'Failed to save preferences'));
     } finally {
       setSaving(false);
     }
@@ -205,7 +207,7 @@ export default function SettingsForm() {
   const persistNotificationPrefs = async (autoSave: boolean) => {
     if (notificationSaving) return;
     if (!autoSave) setSaving(true);
-    setMessage("Saving notifications…");
+    setMessage(t('settings.notifications.saving', 'Saving notifications…'));
     setNotificationSaving(true);
     try {
       const { error } = await supabase.auth.updateUser({
@@ -215,11 +217,11 @@ export default function SettingsForm() {
       try {
         await supabase.auth.refreshSession();
       } catch {}
-      setMessage("Notifications saved");
+      setMessage(t('settings.notifications.saved', 'Notifications saved'));
       setMessageVisible(true);
       setNotificationDirty(false);
     } catch {
-      setMessage("Failed to save notifications");
+      setMessage(t('settings.notifications.saveFailed', 'Failed to save notifications'));
       setMessageVisible(true);
     } finally {
       setNotificationSaving(false);
@@ -328,7 +330,7 @@ export default function SettingsForm() {
     setLinkingEmail(true);
     setMessage(null);
     if (emailLogin.password !== emailLogin.confirmPassword) {
-      setMessage("Passwords do not match");
+      setMessage(t('signup.passwordMismatch', 'Passwords do not match'));
       setLinkingEmail(false);
       return;
     }
@@ -341,10 +343,10 @@ export default function SettingsForm() {
       try {
         await supabase.auth.refreshSession();
       } catch {}
-      setMessage(isEmailConnected ? "Login updated" : "Email login added");
+      setMessage(isEmailConnected ? t('settings.connected.loginUpdated', 'Login updated') : t('settings.connected.emailAdded', 'Email login added'));
       setEmailLogin((prev) => ({ ...prev, password: "", confirmPassword: "" }));
     } catch {
-      setMessage("Failed to update email login");
+      setMessage(t('settings.connected.emailUpdateFailed', 'Failed to update email login'));
     } finally {
       setLinkingEmail(false);
     }
@@ -363,7 +365,7 @@ export default function SettingsForm() {
             type="button"
             className={styles.floatingClose}
             onClick={dismissNotice}
-            aria-label="Dismiss notification"
+            aria-label={t('settings.notice.dismiss', 'Dismiss notification')}
           >
             ×
           </button>
@@ -371,8 +373,8 @@ export default function SettingsForm() {
       )}
 
       <div>
-        <h6>Account Settings</h6>
-        <p>Manage your account settings and preferences</p>
+        <h6>{t('settings.title', 'Account Settings')}</h6>
+        <p>{t('settings.subtitle', 'Manage your account settings and preferences')}</p>
       </div>
       <div className={styles.tabs}>
         <div className={styles.tabSelectWrapper}>
@@ -380,7 +382,7 @@ export default function SettingsForm() {
             className={styles.tabSelect}
             value={activeTab}
             onChange={(e) => setActiveTab(e.target.value as TabId)}
-            aria-label="Choose settings section"
+            aria-label={t('settings.chooseSection', 'Choose settings section')}
           >
             {tabs.map((t) => (
               <option key={t.id} value={t.id}>

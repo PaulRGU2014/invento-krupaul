@@ -11,10 +11,12 @@ import SettingsForm from "@/components/dashboard/account-settings/SettingsForm";
 import { InventoryList } from "@/components/inventory/inventory-list";
 import { ItemForm } from "@/components/inventory/item-form";
 import styles from "./page.module.scss";
+import { useI18n } from "@/lib/i18n";
 import { EmailConfirmationGuard } from "@/components/guards/email-confirmation-guard";
 import { UserProfileProvider, useUserProfile } from "@/components/providers/user-profile-context";
 
 export default function HomePage() {
+  const { t } = useI18n();
   const router = useRouter();
   const { session, authenticated, loading } = useSupabaseSession();
   const { supabase } = useSupabase();
@@ -140,8 +142,8 @@ export default function HomePage() {
               <Package size={24} />
             </div>
             <div className={styles.titleGroup}>
-              <h1>Inventory Manager</h1>
-              <p>Track and manage your stock</p>
+              <h1>{t("home.welcome", "Inventory Manager")}</h1>
+              <p>{t("home.intro", "Track and manage your stock")}</p>
             </div>
           </div>
           <div className={styles.userSection}>
@@ -149,9 +151,9 @@ export default function HomePage() {
               <User size={20} />
               <HeaderUserNameFallback sessionName={displayName} sessionEmail={email} />
             </div>
-            <button onClick={handleLogout} className={styles.logoutButton} title="Logout">
+            <button onClick={handleLogout} className={styles.logoutButton} title={t("login.title", "Logout")}>
               <LogOut size={20} />
-              <span>Logout</span>
+              <span>{t("login.submit", "Logout")}</span>
             </button>
           </div>
         </div>
@@ -167,7 +169,7 @@ export default function HomePage() {
             }}
             className={`${styles.navButton} ${activeView === 'dashboard' ? styles.active : ''}`}
           >
-            Dashboard
+            {t("dashboard.title", "Dashboard")}
           </button>
           <button
             onClick={() => {
@@ -176,13 +178,13 @@ export default function HomePage() {
             }}
             className={`${styles.navButton} ${activeView === 'inventory' ? styles.active : ''}`}
           >
-            Inventory
+            {t("inventory.title", "Inventory")}
           </button>
           <button
             onClick={() => setActiveView('add')}
             className={`${styles.navButton} ${activeView === 'add' ? styles.active : ''}`}
           >
-            {editingItem ? 'Edit Item' : 'Add Item'}
+            {editingItem ? t("inventory.editItem", "Edit Item") : t("inventory.addItem", "Add Item")}
           </button>          
           <button
             onClick={() => {
@@ -191,7 +193,7 @@ export default function HomePage() {
             }}
             className={`${styles.navButton} ${activeView === 'settings' ? styles.active : ''}`}
           >
-            Settings
+            {t("settings.title", "Settings")}
           </button>
         </div>
       </nav>

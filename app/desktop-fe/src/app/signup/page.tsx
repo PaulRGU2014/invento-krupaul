@@ -8,9 +8,11 @@ import Logo from "@/components/logos/logo";
 import GoogleLogo from "@/components/logos/google-logo";
 // import FacebookLogo from "@/components/logos/facebook-logo";
 import { HiOutlineMail, HiOutlineLockClosed, HiOutlineUser } from "react-icons/hi";
+import { useI18n } from "@/lib/i18n";
 
 export default function SignupPage() {
   const router = useRouter();
+  const { t } = useI18n();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,7 +27,7 @@ export default function SignupPage() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!passwordsMatch) {
-      setError("Passwords do not match");
+      setError(t('signup.passwordMismatch', 'Passwords do not match'));
       return;
     }
     setLoading(true);
@@ -37,14 +39,14 @@ export default function SignupPage() {
         options: { data: { full_name: fullName } }
       });
       if (signupError) {
-        setError(signupError.message || "Signup failed");
+        setError(signupError.message || t('common.signupFailed', 'Signup failed'));
         setLoading(false);
         return;
       }
       // Optionally auto-login; Supabase may send confirmation email depending on project settings
       router.replace("/home");
     } catch {
-      setError("Network error");
+      setError(t('common.networkError', 'Network error'));
       setLoading(false);
     }
   };
@@ -56,61 +58,61 @@ export default function SignupPage() {
           <div className={styles.logo}>
             <Logo width={40} height={40} />
           </div>
-          <h1 className={styles.signupTitle}>Create your account</h1>
-          <p className={styles.signupSubtitle}>Start managing inventory</p>
+          <h1 className={styles.signupTitle}>{t('signup.title', 'Create your account')}</h1>
+          <p className={styles.signupSubtitle}>{t('signup.subtitle', 'Start managing inventory')}</p>
         </div>
         <form className={styles.signupForm} onSubmit={onSubmit}>
           <div className={styles.fieldGroup}>
-            <label htmlFor="fullName">Full Name</label>
+            <label htmlFor="fullName">{t('signup.fullName', 'Full Name')}</label>
             <div className={styles.inputWrapper}>
               <HiOutlineUser className={styles.inputIcon} />
               <input
                 id="fullName"
                 type="text"
                 value={fullName}
-                placeholder="Jane Doe"
+                placeholder={t('signup.placeholderName', 'Jane Doe')}
                 onChange={(e) => setFullName(e.target.value)}
                 required
               />
             </div>
           </div>
           <div className={styles.fieldGroup}>
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">{t('login.email', 'Email')}</label>
             <div className={styles.inputWrapper}>
               <HiOutlineMail className={styles.inputIcon} />
               <input
                 id="email"
                 type="email"
                 value={email}
-                placeholder="you@example.com"
+                placeholder={t('signup.placeholderEmail', 'you@example.com')}
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
           </div>
           <div className={styles.fieldGroup}>
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">{t('login.password', 'Password')}</label>
             <div className={styles.inputWrapper}>
               <HiOutlineLockClosed className={styles.inputIcon} />
               <input
                 id="password"
                 type="password"
                 value={password}
-                placeholder="Create a password"
+                placeholder={t('signup.placeholderCreatePassword', 'Create a password')}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
             </div>
           </div>
           <div className={styles.fieldGroup}>
-            <label htmlFor="confirmPassword">Confirm Password</label>
+            <label htmlFor="confirmPassword">{t('signup.confirmPassword', 'Confirm Password')}</label>
             <div className={styles.inputWrapper}>
               <HiOutlineLockClosed className={styles.inputIcon} />
               <input
                 id="confirmPassword"
                 type="password"
                 value={confirmPassword}
-                placeholder="Repeat your password"
+                placeholder={t('signup.placeholderRepeatPassword', 'Repeat your password')}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
               />
@@ -118,17 +120,17 @@ export default function SignupPage() {
           </div>
           {error && <p className={styles.errorMessage}>{error}</p>}
           {!passwordsMatch && confirmPassword && !error && (
-            <p className={styles.errorMessage}>Passwords must match.</p>
+            <p className={styles.errorMessage}>{t('signup.passwordsMustMatch', 'Passwords must match.')}</p>
           )}
           <button
             className={styles.signupButtonPrimary + (!passwordsMatch ? " " + styles.disabled : "")}
             type="submit"
             disabled={loading || !passwordsMatch}
           >
-            {loading ? "Creating..." : "Sign up"}
+            {loading ? t('signup.creating', 'Creating...') : t('signup.buttonSignup', 'Sign up')}
           </button>
           <div className={styles.divider}>
-            <span className={styles.orText}>Or continue with</span>
+            <span className={styles.orText}>{t('signup.orContinue', 'Or continue with')}</span>
           </div>
           <div className={styles.buttonWrapper}>
             <button
@@ -149,7 +151,7 @@ export default function SignupPage() {
               }}
             >
               <GoogleLogo width={24} height={24} />
-              Continue with Google
+              {t('signup.continueGoogle', 'Continue with Google')}
             </button>
             {googleError && <p className={styles.errorMessage}>{googleError}</p>}
             {/* <button
@@ -166,7 +168,7 @@ export default function SignupPage() {
             type="button"
             onClick={() => router.push("/login")}
           >
-            Back to login
+            {t('signup.backToLogin', 'Back to login')}
           </button>
         </form>
       </div>
