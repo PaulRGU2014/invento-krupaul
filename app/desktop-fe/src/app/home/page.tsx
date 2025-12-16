@@ -169,7 +169,7 @@ export default function HomePage() {
             }}
             className={`${styles.navButton} ${activeView === 'dashboard' ? styles.active : ''}`}
           >
-            {t("dashboard.title", "Dashboard")}
+            {t("home.nav.dashboard", "Dashboard")}
           </button>
           <button
             onClick={() => {
@@ -178,13 +178,13 @@ export default function HomePage() {
             }}
             className={`${styles.navButton} ${activeView === 'inventory' ? styles.active : ''}`}
           >
-            {t("inventory.title", "Inventory")}
+            {t("home.nav.inventory", "Inventory")}
           </button>
           <button
             onClick={() => setActiveView('add')}
             className={`${styles.navButton} ${activeView === 'add' ? styles.active : ''}`}
           >
-            {editingItem ? t("inventory.editItem", "Edit Item") : t("inventory.addItem", "Add Item")}
+            {editingItem ? t("home.nav.editItem", "Edit Item") : t("home.nav.addItem", "Add Item")}
           </button>          
           <button
             onClick={() => {
@@ -193,7 +193,7 @@ export default function HomePage() {
             }}
             className={`${styles.navButton} ${activeView === 'settings' ? styles.active : ''}`}
           >
-            {t("settings.title", "Settings")}
+            {t("home.nav.settings", "Settings")}
           </button>
         </div>
       </nav>

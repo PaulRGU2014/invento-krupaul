@@ -13,7 +13,7 @@ import {
 interface NotificationsTabProps {
   notificationPrefs: NotificationPreferences;
   updateNotificationPref: <K extends keyof NotificationPreferences>(key: K, value: NotificationPreferences[K]) => void;
-  frequencyOptions: typeof import("./SettingsForm.types").frequencyOptions;
+  frequencyOptions?: ReadonlyArray<{ value: NotificationFrequency; label: string }>;
   requestWebPermission: () => Promise<void> | void;
   // Optional flags (not required but acceptable):
   notificationSaving?: boolean;

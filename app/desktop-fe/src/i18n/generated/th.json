@@ -6,13 +6,249 @@
     "thai": "ไทย"
   },
   "home": {
-    "welcome": "ยินดีต้อนรับ",
-    "intro": "จัดการสินค้าคงคลังของคุณอย่างมีประสิทธิภาพ"
+    "welcome": "ตัวจัดการสินค้าคงคลัง",
+    "intro": "ติดตามและจัดการสต็อกของคุณ",
+    "nav": {
+      "dashboard": "แดชบอร์ด",
+      "inventory": "สินค้าคงคลัง",
+      "addItem": "เพิ่มสินค้า",
+      "editItem": "แก้ไขสินค้า",
+      "settings": "การตั้งค่า",
+      "logout": "ออกจากระบบ"
+    }
   },
   "login": {
     "title": "เข้าสู่ระบบ",
     "email": "อีเมล",
     "password": "รหัสผ่าน",
-    "submit": "เข้าสู่ระบบ"
+    "submit": "เข้าสู่ระบบ",
+    "manager": "ตัวจัดการสินค้าคงคลัง",
+    "subtitle": "ลงชื่อเข้าใช้บัญชีของคุณ",
+    "placeholderEmail": "you@example.com",
+    "placeholderPassword": "กรอกรหัสผ่าน",
+    "buttonLogin": "เข้าสู่ระบบ",
+    "orContinue": "หรือต่อด้วย",
+    "continueGoogle": "ดำเนินการด้วย Google",
+    "redirecting": "กำลังเปลี่ยนเส้นทาง...",
+    "signupCta": "ยังไม่มีบัญชี? สมัครสมาชิก"
+  },
+  "signup": {
+    "title": "สร้างบัญชีของคุณ",
+    "subtitle": "เริ่มจัดการสินค้าคงคลัง",
+    "fullName": "ชื่อ-นามสกุล",
+    "confirmPassword": "ยืนยันรหัสผ่าน",
+    "placeholderName": "Jane Doe",
+    "placeholderEmail": "you@example.com",
+    "placeholderCreatePassword": "สร้างรหัสผ่าน",
+    "placeholderRepeatPassword": "ใส่รหัสผ่านอีกครั้ง",
+    "passwordMismatch": "รหัสผ่านไม่ตรงกัน",
+    "passwordsMustMatch": "รหัสผ่านต้องตรงกัน",
+    "creating": "กำลังสร้าง...",
+    "buttonSignup": "สมัครสมาชิก",
+    "orContinue": "หรือต่อด้วย",
+    "continueGoogle": "ดำเนินการด้วย Google",
+    "backToLogin": "กลับไปเข้าสู่ระบบ"
+  },
+  "inventory": {
+    "filters": {
+      "searchPlaceholder": "ค้นหาสินค้าหรือซัพพลายเออร์...",
+      "allCategories": "ทุกหมวดหมู่",
+      "allStock": "ทุกระดับสต็อก",
+      "lowStockOnly": "เฉพาะสต็อกต่ำ"
+    },
+    "table": {
+      "item": "สินค้า",
+      "category": "หมวดหมู่",
+      "quantity": "จำนวน",
+      "minStock": "สต็อกขั้นต่ำ",
+      "unitPrice": "ราคาต่อหน่วย",
+      "totalValue": "มูลค่ารวม",
+      "supplier": "ซัพพลายเออร์",
+      "actions": "การกระทำ",
+      "empty": "ไม่พบสินค้าตามตัวกรอง",
+      "edit": "แก้ไขสินค้า",
+      "delete": "ลบสินค้า",
+      "confirmDelete": "คุณต้องการลบ {name} ใช่หรือไม่?"
+    },
+    "summary": {
+      "showing": "แสดงสินค้า",
+      "totalQty": "จำนวนรวม",
+      "totalValue": "มูลค่ารวม",
+      "units": "หน่วย"
+    },
+    "form": {
+      "headerAdd": "เพิ่มสินค้าใหม่",
+      "headerEdit": "แก้ไขสินค้า",
+      "barcode": "บาร์โค้ด / UPC",
+      "scanOrEnter": "สแกนหรือกรอก UPC",
+      "scan": "สแกน",
+      "stop": "หยุด",
+      "lookup": "ค้นหา",
+      "camera": "กล้อง",
+      "hintNew": "ใหม่",
+      "hintScan": "ใช้กล้องสแกนบาร์โค้ดหรือกรอก UPC เพื่อเติมข้อมูลอัตโนมัติ",
+      "name": "ชื่อสินค้า *",
+      "category": "หมวดหมู่ *",
+      "quantity": "จำนวน *",
+      "unit": "หน่วย *",
+      "minStock": "สต็อกขั้นต่ำ *",
+      "price": "ราคาต่อหน่วย ($) *",
+      "supplier": "ซัพพลายเออร์ *",
+      "placeholderName": "เช่น มะเขือเทศ",
+      "placeholderCategory": "เช่น ผัก",
+      "placeholderSupplier": "เช่น Fresh Farms Co.",
+      "cancel": "ยกเลิก",
+      "update": "อัปเดตสินค้า",
+      "add": "เพิ่มสินค้า",
+      "tipLabel": "เคล็ดลับ:",
+      "tipText": "ตั้งสต็อกขั้นต่ำเพื่อรับการแจ้งเตือนเมื่อสต็อกใกล้หมด ช่วยให้สั่งซื้อได้ทันเวลา",
+      "modalScanTitle": "สแกนบาร์โค้ด",
+      "close": "ปิด",
+      "cameraNotice": "กล้องต้องใช้ HTTPS หรือ localhost โปรดใช้ https:// หรือรันในเครื่อง",
+      "cameraDenied": "ปฏิเสธการใช้กล้อง โปรดอนุญาตการเข้าถึงกล้องในเบราว์เซอร์",
+      "cameraUnable": "ไม่สามารถเริ่มกล้อง โปรดอนุญาตการเข้าถึงหรือกรอกข้อมูลด้วยตนเอง",
+      "barcodeNotFound": "ไม่พบบาร์โค้ด",
+      "lookupFailed": "ค้นหาไม่สำเร็จ โปรดลองอีกครั้ง"
+    },
+    "units": {
+      "kg": "กิโลกรัม (กก.)",
+      "g": "กรัม (ก.)",
+      "liters": "ลิตร",
+      "ml": "มิลลิลิตร (มล.)",
+      "pieces": "ชิ้น",
+      "boxes": "กล่อง",
+      "cans": "กระป๋อง",
+      "bottles": "ขวด"
+    }
+  },
+  "dashboard": {
+    
+    "stats": {
+      "totalItems": "จำนวนสินค้าทั้งหมด",
+      "lowStock": "การแจ้งเตือนสต็อกต่ำ",
+      "totalValue": "มูลค่ารวม",
+      "categories": "หมวดหมู่"
+    },
+    "lowStock": {
+      "title": "การแจ้งเตือนสต็อกต่ำ",
+      "empty": "ไม่มีสินค้าที่สต็อกต่ำ",
+      "min": "ขั้นต่ำ: {count}"
+    },
+    "byCategory": {
+      "title": "สินค้าตามหมวดหมู่",
+      "items": "รายการ"
+    },
+    "recent": {
+      "title": "อัปเดตล่าสุด",
+      "item": "สินค้า",
+      "category": "หมวดหมู่",
+      "quantity": "จำนวน",
+      "value": "มูลค่า",
+      "lastUpdated": "อัปเดตล่าสุด"
+    }
+  },
+  "settings": {
+    "title": "การตั้งค่าบัญชี",
+    "subtitle": "จัดการการตั้งค่าและความต้องการของคุณ",
+    "chooseSection": "เลือกหมวดการตั้งค่า",
+    "tabs": {
+      "profile": "โปรไฟล์",
+      "connected": "บัญชีที่เชื่อมต่อ",
+      "security": "ความปลอดภัย",
+      "preferences": "การตั้งค่าพื้นฐาน",
+      "notifications": "การแจ้งเตือน"
+    },
+    "notice": {
+      "dismiss": "ปิดการแจ้งเตือน"
+    },
+    "profile": {
+      "name": "ชื่อ",
+      "placeholderName": "ชื่อของคุณ",
+      "save": "บันทึกโปรไฟล์",
+      "saved": "บันทึกโปรไฟล์แล้ว",
+      "saveFailed": "บันทึกโปรไฟล์ไม่สำเร็จ"
+    },
+    "avatar": {
+      "title": "รูปโปรไฟล์",
+      "description": "อัปโหลดหรือเปลี่ยนรูปโปรไฟล์ของคุณ (ตัวยึดตำแหน่ง)",
+      "upload": "อัปโหลด"
+    },
+    "connected": {
+      "title": "บัญชีที่เชื่อมต่อ",
+      "description": "จัดการผู้ให้บริการล็อกอินภายนอกที่เชื่อมกับบัญชีของคุณ",
+      "emailPass": "อีเมลและรหัสผ่าน",
+      "emailPassDescription": "ตั้งค่าหรืออัปเดตรหัสผ่านสำหรับบัญชีนี้",
+      "statusLabel": "สถานะ:",
+      "connected": "เชื่อมต่อแล้ว",
+      "notConnected": "ยังไม่เชื่อมต่อ",
+      "updateLogin": "อัปเดตการเข้าสู่ระบบ",
+      "addEmailLogin": "เพิ่มการเข้าสู่ระบบด้วยอีเมล",
+      "facebook": "Facebook",
+      "connect": "เชื่อมต่อ",
+      "disconnect": "ยกเลิกเชื่อมต่อ",
+      "loginUpdated": "อัปเดตการเข้าสู่ระบบแล้ว",
+      "emailAdded": "เพิ่มการเข้าสู่ระบบอีเมลแล้ว",
+      "emailUpdateFailed": "อัปเดตการเข้าสู่ระบบอีเมลไม่สำเร็จ",
+      "google": {
+        "label": "Google",
+        "already": "เชื่อมต่อ Google แล้ว",
+        "redirecting": "กำลังเปลี่ยนเส้นทางไปยัง Google OAuth…",
+        "failedStart": "เริ่มเชื่อมต่อ Google ไม่สำเร็จ",
+        "notConnected": "ยังไม่เชื่อมต่อ Google",
+        "identityMissing": "ไม่พบข้อมูลบัญชี Google",
+        "disconnected": "ยกเลิกเชื่อมต่อ Google แล้ว",
+        "failedDisconnect": "ยกเลิกเชื่อมต่อ Google ไม่สำเร็จ"
+      }
+    },
+    "security": {
+      "currentPassword": "รหัสผ่านปัจจุบัน",
+      "newPassword": "รหัสผ่านใหม่",
+      "confirmNewPassword": "ยืนยันรหัสผ่านใหม่",
+      "changePassword": "เปลี่ยนรหัสผ่าน",
+      "passwordSaved": "บันทึกรหัสผ่านแล้ว",
+      "passwordFailed": "เปลี่ยนรหัสผ่านไม่สำเร็จ"
+    },
+    "preferences": {
+      "theme": "ธีม",
+      "system": "ตามระบบ",
+      "light": "สว่าง",
+      "dark": "มืด",
+      "save": "บันทึกการตั้งค่า",
+      "saved": "บันทึกการตั้งค่าแล้ว",
+      "saveFailed": "บันทึกการตั้งค่าไม่สำเร็จ"
+    },
+    "notifications": {
+      "aria": "การตั้งค่าการแจ้งเตือน",
+      "intro": "เลือกวิธีที่ต้องการรับการแจ้งเตือน เราแนะนำให้เปิดอย่างน้อยหนึ่งช่องทาง",
+      "enable": "เปิดการแจ้งเตือน",
+      "enableDesc": "สวิตช์หลักสำหรับการแจ้งเตือนทั้งหมด",
+      "web": "การแจ้งเตือนเว็บ",
+      "webDesc": "แสดงการแจ้งเตือนในเบราว์เซอร์",
+      "granted": "อนุญาตแล้ว",
+      "enableAction": "เปิดใช้งาน",
+      "email": "การแจ้งเตือนทางอีเมล",
+      "emailDesc": "รับการอัปเดตทางกล่องจดหมาย",
+      "sms": "การแจ้งเตือนทาง SMS",
+      "smsDesc": "ส่งแจ้งเตือนสำคัญผ่านข้อความ",
+      "product": "อัปเดตผลิตภัณฑ์",
+      "productDesc": "รับเคล็ดลับ ประกาศ และฟีเจอร์ใหม่",
+      "lowStock": "แจ้งเตือนสต็อกต่ำ",
+      "lowStockDesc": "แจ้งเมื่อสินค้าต่ำกว่าระดับที่กำหนด",
+      "cadence": "ความถี่การแจ้งเตือน",
+      "frequency": {
+        "immediate": "ทันที",
+        "hourly": "สรุปรายชั่วโมง",
+        "daily": "สรุปรายวัน",
+        "weekly": "สรุปรายสัปดาห์"
+      },
+      "saving": "กำลังบันทึกการแจ้งเตือน...",
+      "saved": "บันทึกการแจ้งเตือนแล้ว",
+      "saveFailed": "บันทึกการแจ้งเตือนไม่สำเร็จ"
+    }
+  },
+  "common": {
+    "saving": "กำลังบันทึก...",
+    "signupFailed": "สมัครสมาชิกไม่สำเร็จ",
+    "networkError": "เครือข่ายมีปัญหา"
   }
 }

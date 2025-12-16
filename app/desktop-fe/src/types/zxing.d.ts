@@ -11,6 +11,11 @@ declare module '@zxing/browser' {
 
   export class BrowserMultiFormatReader {
     constructor(hints?: HintMap, timeBetweenScansMillis?: number);
+    decodeFromConstraints(
+      constraints: MediaStreamConstraints,
+      videoElement: HTMLVideoElement,
+      callback: (result: Result | undefined, error: unknown, controls: IScannerControls | undefined) => void
+    ): Promise<IScannerControls>;
     decodeFromVideoDevice(
       deviceId: string | undefined,
       videoElement: HTMLVideoElement,
