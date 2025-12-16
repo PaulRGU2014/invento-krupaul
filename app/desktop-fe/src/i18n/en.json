@@ -18,10 +18,10 @@
     }
   },
   "login": {
-    "title": "Sign in",
+    "title": "Sign Out",
     "email": "Email",
     "password": "Password",
-    "submit": "Sign in",
+    "submit": "Sign Out",
     "manager": "Inventory Manager",
     "subtitle": "Sign in to your account",
     "placeholderEmail": "you@example.com",
