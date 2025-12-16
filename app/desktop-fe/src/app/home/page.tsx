@@ -8,6 +8,7 @@ import { InventoryItem } from "@/types/inventory";
 import { fetchInventory, createInventoryItem, updateInventoryItem, deleteInventoryItem } from "@/lib/inventory-api";
 import { Dashboard } from "@/components/dashboard/dashboard";
 import SettingsForm from "@/components/dashboard/account-settings/SettingsForm";
+import FeedbackForm from "@/components/feedback/feedback-form";
 import { InventoryList } from "@/components/inventory/inventory-list";
 import { ItemForm } from "@/components/inventory/item-form";
 import styles from "./page.module.scss";
@@ -20,7 +21,7 @@ export default function HomePage() {
   const router = useRouter();
   const { session, authenticated, loading } = useSupabaseSession();
   const { supabase } = useSupabase();
-  const [activeView, setActiveView] = useState<'dashboard' | 'inventory' | 'add' | 'settings'>('dashboard');
+  const [activeView, setActiveView] = useState<'dashboard' | 'inventory' | 'add' | 'settings' | 'feedback'>('dashboard');
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
   const [items, setItems] = useState<InventoryItem[]>([]);
 
@@ -188,6 +189,15 @@ export default function HomePage() {
           </button>          
           <button
             onClick={() => {
+              setActiveView('feedback');
+              setEditingItem(null);
+            }}
+            className={`${styles.navButton} ${activeView === 'feedback' ? styles.active : ''}`}
+          >
+            {t("home.nav.feedback", "Feedback")}
+          </button>
+          <button
+            onClick={() => {
               setActiveView('settings');
               setEditingItem(null);
             }}
@@ -209,6 +219,9 @@ export default function HomePage() {
             onDelete={handleDeleteItem}
             onInlineUpdate={handleInlineUpdate}
           />
+        )}
+        {activeView === 'feedback' && (
+          <FeedbackForm defaultName={displayName} defaultEmail={email} />
         )}
         {activeView === 'add' && (
           <ItemForm

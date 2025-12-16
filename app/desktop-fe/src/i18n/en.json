@@ -17,6 +17,22 @@
       "logout": "Logout"
     }
   },
+  "feedback": {
+    "title": "Share Feedback",
+    "subtitle": "We value your thoughts and ideas.",
+    "name": "Name",
+    "name.placeholder": "Your name",
+    "email": "Email",
+    "email.placeholder": "you@example.com",
+    "comments": "Comments",
+    "comments.placeholder": "Tell us what's on your mind...",
+    "image": "Optional Image",
+    "submit": "Send Feedback",
+    "sending": "Sending...",
+    "success": "Thanks for your feedback!",
+    "error": "Unable to send feedback. Try again later.",
+    "recaptcha.error": "reCAPTCHA verification failed. Please retry."
+  },
   "login": {
     "title": "Sign Out",
     "email": "Email",
