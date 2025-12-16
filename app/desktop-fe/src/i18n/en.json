@@ -31,7 +31,9 @@
     "sending": "Sending...",
     "success": "Thanks for your feedback!",
     "error": "Unable to send feedback. Try again later.",
-    "recaptcha.error": "reCAPTCHA verification failed. Please retry."
+    "recaptcha.error": "reCAPTCHA verification failed. Please retry.",
+    "rateLimit": "Too many requests. Please wait and try again.",
+    "tryAgainIn": "Try again in"
   },
   "login": {
     "title": "Sign Out",

@@ -1,6 +1,24 @@
 export const runtime = "nodejs";
 import { NextResponse } from "next/server";
 
+// ---- Rate limiting (module scope) ----
+const RATE_LIMIT_WINDOW_MS = (Number(process.env.RATE_LIMIT_WINDOW_SECONDS) || 60) * 1000; // default 60s
+const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX) || 5; // default 5 reqs per window
+const rateMap = new Map<string, number[]>();
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const arr = rateMap.get(ip) || [];
+  const recent = arr.filter(ts => now - ts < RATE_LIMIT_WINDOW_MS);
+  if (recent.length >= RATE_LIMIT_MAX) {
+    rateMap.set(ip, recent);
+    return true;
+  }
+  recent.push(now);
+  rateMap.set(ip, recent);
+  return false;
+}
+
 type Attachment = { filename: string; content: string } | null;
 
 export async function POST(req: Request) {
@@ -16,6 +34,12 @@ export async function POST(req: Request) {
 
     if (!email || !comments) {
       return NextResponse.json({ success: false, error: "Missing fields" }, { status: 400 });
+    }
+
+    // Rate limit per IP before any external calls
+    const ip = (req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "").split(",")[0].trim() || "unknown";
+    if (isRateLimited(ip)) {
+      return NextResponse.json({ success: false, error: "rate_limit" }, { status: 429 });
     }
 
     const to = "paul@krupaul.com";

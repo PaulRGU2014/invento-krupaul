@@ -18,6 +18,7 @@ export function FeedbackForm({ defaultName = "", defaultEmail = "" }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [recaptchaReady, setRecaptchaReady] = useState(false);
+  const [cooldownSeconds, setCooldownSeconds] = useState(0);
 
   useEffect(() => {
     const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
@@ -39,6 +40,14 @@ export function FeedbackForm({ defaultName = "", defaultEmail = "" }: Props) {
     }
   }, []);
 
+  useEffect(() => {
+    if (cooldownSeconds <= 0) return;
+    const id = setInterval(() => {
+      setCooldownSeconds((s) => (s > 0 ? s - 1 : 0));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [cooldownSeconds]);
+
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0] || null;
     setImageFile(f);
@@ -59,6 +68,7 @@ export function FeedbackForm({ defaultName = "", defaultEmail = "" }: Props) {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (cooldownSeconds > 0) return;
     setSubmitting(true);
     setStatus(null);
     try {
@@ -79,10 +89,18 @@ export function FeedbackForm({ defaultName = "", defaultEmail = "" }: Props) {
         body: JSON.stringify({ name, email, comments, attachment, recaptchaToken }),
       });
       const json = await res.json();
+      let hadSpecificError = false;
       if (!res.ok || !json.success) {
         if (json?.error === "recaptcha") {
           setStatus(t("feedback.recaptcha.error", "reCAPTCHA verification failed. Please retry."));
+          hadSpecificError = true;
           throw new Error("recaptcha");
+        }
+        if (json?.error === "rate_limit") {
+          setStatus(t("feedback.rateLimit", "Too many requests. Please wait and try again."));
+          setCooldownSeconds(30);
+          hadSpecificError = true;
+          throw new Error("rate_limit");
         }
         throw new Error(json.error || "Failed to send feedback");
       }
@@ -90,7 +108,8 @@ export function FeedbackForm({ defaultName = "", defaultEmail = "" }: Props) {
       setComments("");
       setImageFile(null);
     } catch (err: any) {
-      setStatus(t("feedback.error", "Unable to send feedback. Try again later."));
+      // If we didn't already show a specific message, show a generic error
+      setStatus((prev) => prev ?? t("feedback.error", "Unable to send feedback. Try again later."));
     } finally {
       setSubmitting(false);
     }
@@ -138,8 +157,12 @@ export function FeedbackForm({ defaultName = "", defaultEmail = "" }: Props) {
           <input className={styles.file} type="file" accept="image/*" onChange={onFileChange} />
         </div>
         <div className={styles.actions}> 
-          <button className={styles.submit} type="submit" disabled={submitting}>
-            {submitting ? t("feedback.sending", "Sending...") : t("feedback.submit", "Send Feedback")}
+          <button className={styles.submit} type="submit" disabled={submitting || cooldownSeconds > 0} aria-disabled={submitting || cooldownSeconds > 0}>
+            {submitting
+              ? t("feedback.sending", "Sending...")
+              : cooldownSeconds > 0
+              ? `${t("feedback.tryAgainIn", "Try again in")} ${cooldownSeconds}s`
+              : t("feedback.submit", "Send Feedback")}
           </button>
         </div>
         {status && <div className={styles.status}>{status}</div>}
