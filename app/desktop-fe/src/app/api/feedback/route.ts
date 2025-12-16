@@ -61,7 +61,7 @@ export async function POST(req: Request) {
     });
 
     if (!sent) {
-      return NextResponse.json({ success: false, error: "Email service not configured" }, { status: 500 });
+      return NextResponse.json({ success: false, error: "email_not_configured" }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
@@ -112,7 +112,8 @@ async function sendEmail({
         body: JSON.stringify({ to, from, subject, html, attachments }),
       });
       return resp.ok;
-    } catch {
+    } catch (e) {
+      console.error("feedback: resend send error", e);
       return false;
     }
   }
@@ -139,7 +140,8 @@ async function sendEmail({
         attachments: attachments.map(a => ({ filename: a.filename, content: Buffer.from(a.content, "base64") })),
       });
       return true;
-    } catch {
+    } catch (e) {
+      console.error("feedback: smtp send error", e);
       return false;
     }
   }
