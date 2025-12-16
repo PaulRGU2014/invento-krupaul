@@ -111,10 +111,13 @@ async function sendEmail({
         },
         body: JSON.stringify({ to, from, subject, html, attachments }),
       });
-      return resp.ok;
+      if (resp.ok) return true;
+      const text = await resp.text();
+      console.error("feedback: resend non-OK response", resp.status, text);
+      // continue to SMTP fallback
     } catch (e) {
       console.error("feedback: resend send error", e);
-      return false;
+      // continue to SMTP fallback
     }
   }
 
@@ -134,7 +137,7 @@ async function sendEmail({
       });
       await transporter.sendMail({
         to,
-        from,
+        from: process.env.EMAIL_FROM || user,
         subject,
         html,
         attachments: attachments.map(a => ({ filename: a.filename, content: Buffer.from(a.content, "base64") })),
