@@ -35,6 +35,10 @@
     "rateLimit": "Too many requests. Please wait and try again.",
     "tryAgainIn": "Try again in"
   },
+  "beta": {
+    "note": "Beta version — we'd love to hear from you!",
+    "feedbackCta": "Send Feedback"
+  },
   "login": {
     "title": "Sign Out",
     "email": "Email",

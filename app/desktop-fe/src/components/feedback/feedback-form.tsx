@@ -7,9 +7,10 @@ import { useI18n } from "@/lib/i18n";
 type Props = {
   defaultName?: string;
   defaultEmail?: string;
+  onSubmitted?: () => void;
 };
 
-export function FeedbackForm({ defaultName = "", defaultEmail = "" }: Props) {
+export function FeedbackForm({ defaultName = "", defaultEmail = "", onSubmitted }: Props) {
   const { t } = useI18n();
   const [name, setName] = useState(defaultName);
   const [email, setEmail] = useState(defaultEmail);
@@ -107,6 +108,7 @@ export function FeedbackForm({ defaultName = "", defaultEmail = "" }: Props) {
       setStatus(t("feedback.success", "Thanks for your feedback!"));
       setComments("");
       setImageFile(null);
+      onSubmitted?.();
     } catch (err: any) {
       // If we didn't already show a specific message, show a generic error
       setStatus((prev) => prev ?? t("feedback.error", "Unable to send feedback. Try again later."));

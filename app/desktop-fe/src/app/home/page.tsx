@@ -187,15 +187,7 @@ export default function HomePage() {
           >
             {editingItem ? t("home.nav.editItem", "Edit Item") : t("home.nav.addItem", "Add Item")}
           </button>          
-          <button
-            onClick={() => {
-              setActiveView('feedback');
-              setEditingItem(null);
-            }}
-            className={`${styles.navButton} ${activeView === 'feedback' ? styles.active : ''}`}
-          >
-            {t("home.nav.feedback", "Feedback")}
-          </button>
+          {/* Feedback tab removed per request */}
           <button
             onClick={() => {
               setActiveView('settings');
@@ -220,9 +212,6 @@ export default function HomePage() {
             onInlineUpdate={handleInlineUpdate}
           />
         )}
-        {activeView === 'feedback' && (
-          <FeedbackForm defaultName={displayName} defaultEmail={email} />
-        )}
         {activeView === 'add' && (
           <ItemForm
             item={editingItem}
@@ -230,6 +219,22 @@ export default function HomePage() {
             onCancel={handleCancelEdit}
           />
         )}
+        {/* Footer with beta note and feedback link */}
+        <div style={{ marginTop: '24px', paddingTop: '12px', borderTop: '1px solid #ebe6e7', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ color: '#364153' }}>
+            {t('beta.note', 'Beta version — we\'d love to hear from you!')}
+          </span>
+          <button
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                window.open('/feedback', '_blank', 'noopener,noreferrer');
+              }
+            }}
+            style={{ background: '#155dfc', color: '#fff', borderRadius: 8, padding: '8px 12px' }}
+          >
+            {t('beta.feedbackCta', 'Send Feedback')}
+          </button>
+        </div>
       </main>
     </div>
     </UserProfileProvider>
