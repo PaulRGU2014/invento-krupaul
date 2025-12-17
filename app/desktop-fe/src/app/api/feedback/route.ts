@@ -55,7 +55,7 @@ export async function POST(req: Request) {
 
     const sent = await sendEmail({
       to,
-      subject: `[Feedback] ${name || "Anonymous"}`,
+      subject: `[Invento Feedback] ${name || "Anonymous"}`,
       html: renderHtml({ name, email, comments }),
       attachments: attachment ? [attachment] : [],
     });
