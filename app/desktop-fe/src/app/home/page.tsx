@@ -8,7 +8,6 @@ import { InventoryItem } from "@/types/inventory";
 import { fetchInventory, createInventoryItem, updateInventoryItem, deleteInventoryItem } from "@/lib/inventory-api";
 import { Dashboard } from "@/components/dashboard/dashboard";
 import SettingsForm from "@/components/dashboard/account-settings/SettingsForm";
-import FeedbackForm from "@/components/feedback/feedback-form";
 import { InventoryList } from "@/components/inventory/inventory-list";
 import { ItemForm } from "@/components/inventory/item-form";
 import styles from "./page.module.scss";

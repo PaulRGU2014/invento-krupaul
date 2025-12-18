@@ -4,7 +4,6 @@ import type { NextRequest } from "next/server";
 const supported = new Set(["en", "th"]);
 
 export function middleware(req: NextRequest) {
-  const url = req.nextUrl.clone();
   const cookieLocale = req.cookies.get("locale")?.value;
   let locale = cookieLocale;
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { InventoryItem } from '@/types/inventory';
 import { lookupByUpc } from '@/lib/inventory-api';
@@ -147,7 +147,7 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
         // Prefer back-facing camera on mobile by label heuristic
         const preferred = list.find(d => /back|rear|environment/i.test(d.label)) || list[0];
         setSelectedDeviceId(preferred?.deviceId);
-      } catch (e) {
+      } catch {
         // silently ignore; UI will still allow manual UPC entry
       }
     };
@@ -165,6 +165,32 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
     setScanning(true);
     setShowScannerModal(true);
   };
+
+  const handleLookup = useCallback(async (code?: string) => {
+    const upc = (code ?? upcValue).trim();
+    if (!upc) return;
+    setLookupError(null);
+    setLookupLoading(true);
+    try {
+      const res = await lookupByUpc(upc);
+      if (!res?.success) {
+        setLookupError(res?.error || t('inventory.form.barcodeNotFound', 'Barcode not found'));
+        return;
+      }
+      const data = res.data || {};
+      setFormData(prev => ({
+        ...prev,
+        name: data.name || prev.name,
+        category: data.category || prev.category,
+        supplier: data.brand || prev.supplier,
+      }));
+    } catch (error: unknown) {
+      console.error('UPC lookup failed', error);
+      setLookupError(t('inventory.form.lookupFailed', 'Lookup failed. Please try again.'));
+    } finally {
+      setLookupLoading(false);
+    }
+  }, [t, upcValue]);
 
   useEffect(() => {
     const runScanner = async () => {
@@ -207,33 +233,7 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
         stopScanner();
       }
     };
-  }, [showScannerModal, selectedDeviceId, reader]);
-
-  const handleLookup = async (code?: string) => {
-    const upc = (code ?? upcValue).trim();
-    if (!upc) return;
-    setLookupError(null);
-    setLookupLoading(true);
-    try {
-      const res = await lookupByUpc(upc);
-      if (!res?.success) {
-        setLookupError(res?.error || t('inventory.form.barcodeNotFound', 'Barcode not found'));
-        return;
-      }
-      const data = res.data || {};
-      setFormData(prev => ({
-        ...prev,
-        name: data.name || prev.name,
-        category: data.category || prev.category,
-        supplier: data.brand || prev.supplier,
-      }));
-    } catch (error: unknown) {
-      console.error('UPC lookup failed', error);
-      setLookupError(t('inventory.form.lookupFailed', 'Lookup failed. Please try again.'));
-    } finally {
-      setLookupLoading(false);
-    }
-  };
+  }, [showScannerModal, selectedDeviceId, reader, handleLookup, t]);
 
   return (
     <div className={styles.wrapper}>

@@ -21,7 +21,6 @@ export function useEntitlements(): EntitlementsState {
 
   useEffect(() => {
     const controller = new AbortController();
-    setIsLoading(true);
     fetch('/api/billing/entitlements', { signal: controller.signal })
       .then(async (res) => {
         const json = await res.json().catch(() => ({ success: false, error: 'Invalid JSON' }));

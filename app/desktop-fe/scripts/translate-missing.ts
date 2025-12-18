@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { Translate } from '@google-cloud/translate/build/src/v2';
 
-type Messages = Record<string, any>;
+type Messages = Record<string, unknown>;
 
 const root = path.resolve(__dirname, '..');
 const enPath = path.join(root, 'src/i18n/en.json');
@@ -19,13 +19,18 @@ function writeJson(p: string, obj: Messages) {
   fs.writeFileSync(p, JSON.stringify(obj, null, 2) + '\n', 'utf-8');
 }
 
+function isPlainObject(val: unknown): val is Record<string, unknown> {
+  return !!val && typeof val === 'object' && !Array.isArray(val);
+}
+
 function flatten(obj: Messages, prefix = ''): Record<string, string> {
   const out: Record<string, string> = {};
-  for (const k of Object.keys(obj)) {
-    const v = obj[k];
+  const rec = obj as Record<string, unknown>;
+  for (const k of Object.keys(rec)) {
+    const v = rec[k];
     const key = prefix ? `${prefix}.${k}` : k;
-    if (v && typeof v === 'object' && !Array.isArray(v)) {
-      Object.assign(out, flatten(v, key));
+    if (isPlainObject(v)) {
+      Object.assign(out, flatten(v as Record<string, unknown>, key));
     } else if (typeof v === 'string') {
       out[key] = v;
     }
@@ -35,11 +40,12 @@ function flatten(obj: Messages, prefix = ''): Record<string, string> {
 
 function setNested(obj: Messages, key: string, value: string) {
   const parts = key.split('.');
-  let cur = obj;
+  let cur = obj as Record<string, unknown>;
   for (let i = 0; i < parts.length - 1; i++) {
     const p = parts[i];
-    cur[p] = cur[p] && typeof cur[p] === 'object' ? cur[p] : {};
-    cur = cur[p];
+    const next = cur[p];
+    cur[p] = isPlainObject(next) ? next : {};
+    cur = cur[p] as Record<string, unknown>;
   }
   cur[parts[parts.length - 1]] = value;
 }

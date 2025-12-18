@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     const translate = new Translate({ projectId });
     const [translation] = await translate.translate(text, targetLocale);
     return NextResponse.json({ translatedText: translation, targetLocale });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

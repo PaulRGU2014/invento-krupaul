@@ -29,7 +29,9 @@ export function FeedbackForm({ defaultName = "", defaultEmail = "", onSubmitted 
       return;
     }
     // Load reCAPTCHA v3 script if not present
-    if (!(window as any).grecaptcha) {
+    type Grecaptcha = { execute: (siteKey: string, options: { action: string }) => Promise<string> };
+    const grecaptchaObj = (window as unknown as { grecaptcha?: Grecaptcha }).grecaptcha;
+    if (!grecaptchaObj) {
       const script = document.createElement("script");
       script.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
       script.async = true;
@@ -75,8 +77,11 @@ export function FeedbackForm({ defaultName = "", defaultEmail = "", onSubmitted 
     try {
       const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
       let recaptchaToken: string | undefined = undefined;
-      if (siteKey && recaptchaReady && (window as any).grecaptcha) {
-        recaptchaToken = await (window as any).grecaptcha.execute(siteKey, { action: "feedback_submit" });
+      if (siteKey && recaptchaReady) {
+        const grecaptchaObj = (window as unknown as { grecaptcha?: { execute: (siteKey: string, options: { action: string }) => Promise<string> } }).grecaptcha;
+        if (grecaptchaObj) {
+          recaptchaToken = await grecaptchaObj.execute(siteKey, { action: "feedback_submit" });
+        }
       }
       let attachment: { filename: string; content: string } | null = null;
       if (imageFile) {
@@ -90,17 +95,14 @@ export function FeedbackForm({ defaultName = "", defaultEmail = "", onSubmitted 
         body: JSON.stringify({ name, email, comments, attachment, recaptchaToken }),
       });
       const json = await res.json();
-      let hadSpecificError = false;
       if (!res.ok || !json.success) {
         if (json?.error === "recaptcha") {
           setStatus(t("feedback.recaptcha.error", "reCAPTCHA verification failed. Please retry."));
-          hadSpecificError = true;
           throw new Error("recaptcha");
         }
         if (json?.error === "rate_limit") {
           setStatus(t("feedback.rateLimit", "Too many requests. Please wait and try again."));
           setCooldownSeconds(30);
-          hadSpecificError = true;
           throw new Error("rate_limit");
         }
         throw new Error(json.error || "Failed to send feedback");
@@ -109,7 +111,7 @@ export function FeedbackForm({ defaultName = "", defaultEmail = "", onSubmitted 
       setComments("");
       setImageFile(null);
       onSubmitted?.();
-    } catch (err: any) {
+    } catch {
       // If we didn't already show a specific message, show a generic error
       setStatus((prev) => prev ?? t("feedback.error", "Unable to send feedback. Try again later."));
     } finally {

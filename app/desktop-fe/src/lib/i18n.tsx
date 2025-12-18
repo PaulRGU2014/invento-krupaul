@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useMemo, useEffect, useState } from "react";
 
-type Messages = Record<string, any>;
+type Messages = Record<string, unknown>;
 
 type I18nContextValue = {
   locale: string;
@@ -38,31 +38,30 @@ async function loadMessages(locale: string): Promise<Messages> {
   return merged;
 }
 
-function deepMerge(target: Messages, source: Messages): Messages {
-  const out: Messages = Array.isArray(target) ? [...target] : { ...target };
+function isPlainObject(val: unknown): val is Record<string, unknown> {
+  return !!val && typeof val === "object" && !Array.isArray(val);
+}
+
+export function deepMerge(target: Messages, source: Messages): Messages {
+  const out: Messages = { ...target };
   for (const key of Object.keys(source)) {
-    const s = source[key];
-    const t = (out as any)[key];
-    if (s && typeof s === "object" && !Array.isArray(s)) {
-      (out as any)[key] = deepMerge(t && typeof t === "object" ? t : {}, s);
-    } else {
-      (out as any)[key] = s;
-    }
+    const s = (source as Record<string, unknown>)[key];
+    const t = out[key];
+    out[key] = isPlainObject(s) && isPlainObject(t)
+      ? deepMerge(t as Messages, s as Messages)
+      : s;
   }
   return out;
 }
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<string>("en");
-  const [messages, setMessages] = useState<Messages>({});
-
-  // Initialize from cookie or browser settings
-  useEffect(() => {
+  const [locale, setLocaleState] = useState<string>(() => {
     const cookieLocale = getCookie("locale");
     let initial = cookieLocale || (typeof navigator !== "undefined" ? navigator.language.split("-")[0] : "en");
     if (initial !== "th" && initial !== "en") initial = "en";
-    setLocaleState(initial);
-  }, []);
+    return initial;
+  });
+  const [messages, setMessages] = useState<Messages>({});
 
   useEffect(() => {
     loadMessages(locale).then(setMessages).catch(() => setMessages({}));
@@ -75,10 +74,10 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   const t = useMemo(() => {
     return (key: string, fallback?: string) => {
       const parts = key.split(".");
-      let cur: any = messages;
+      let cur: unknown = messages;
       for (const p of parts) {
-        if (cur && typeof cur === "object" && p in cur) {
-          cur = cur[p];
+        if (isPlainObject(cur) && p in cur) {
+          cur = (cur as Record<string, unknown>)[p];
         } else {
           cur = undefined;
           break;

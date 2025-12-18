@@ -165,7 +165,9 @@ export async function POST(req: NextRequest) {
 
     if (event.type === 'invoice.payment_succeeded') {
       const invoice = event.data.object as Stripe.Invoice;
-      const userId = (invoice.metadata && invoice.metadata['user_id']) || (invoice.subscription_details && (invoice.subscription_details as any).metadata?.user_id);
+      type SubDetails = { metadata?: Record<string, string> } | null | undefined;
+      const subDetails = invoice.subscription_details as SubDetails;
+      const userId = invoice.metadata?.['user_id'] ?? subDetails?.metadata?.['user_id'];
       const subId = invoice.subscription as string | undefined;
       if (userId && subId) {
         await handleStripeSubscription(userId, subId);
