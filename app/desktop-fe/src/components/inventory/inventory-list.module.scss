@@ -7,10 +7,10 @@
 }
 
 .filterCard {
-  background-color: #fff;
+  background-color: $white;
   border-radius: 0.75rem;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 2px $shadow-light;
+  border: 1px solid $gray-200;
   padding: 1.5rem;
 }
 
@@ -28,40 +28,40 @@
     left: 0.75rem;
     top: 50%;
     transform: translateY(-50%);
-    color: #9ca3af;
+    color: $gray-400;
   }
 
   input {
     width: 100%;
     padding: 0.5rem 1rem 0.5rem 2.5rem;
-    border: 1px solid #d1d5db;
+    border: 1px solid $gray-300;
     border-radius: 0.5rem;
     outline: none;
 
     &:focus {
-      border-color: #007bff;
-      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+      border-color: $primary-blue;
+      box-shadow: 0 0 0 3px $shadow-blue;
     }
   }
 }
 
 .select {
   padding: 0.5rem 1rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid $gray-300;
   border-radius: 0.5rem;
   outline: none;
 
   &:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    border-color: $primary-blue;
+    box-shadow: 0 0 0 3px $shadow-blue;
   }
 }
 
 .tableCard {
-  background-color: #fff;
+  background-color: $white;
   border-radius: 0.75rem;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 2px $shadow-light;
+  border: 1px solid $gray-200;
   overflow: hidden;
 }
 
@@ -81,24 +81,24 @@
     border-collapse: collapse;
 
     thead {
-      background-color: #f9fafb;
+      background-color: $gray-50;
 
       th {
         text-align: left;
         padding: 0.75rem 1rem;
         font-size: 0.875rem;
         font-weight: 500;
-        color: #6b7280;
+        color: $gray-500;
       }
     }
 
     tbody {
       tr {
-        border-top: 1px solid #f3f4f6;
+        border-top: 1px solid $gray-100;
         transition: background-color 0.2s;
 
         &:hover {
-          background-color: #f9fafb;
+          background-color: $gray-50;
         }
 
         td {
@@ -114,10 +114,10 @@
             width: 100%;
             max-width: 140px;
             padding: 0.35rem 0.5rem;
-            border: 1px solid #d1d5db;
+            border: 1px solid $gray-300;
             border-radius: 0.5rem;
             font-size: 0.875rem;
-            background: #fff;
+            background: $white;
             transition: border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
 
             &:focus {
@@ -138,7 +138,7 @@
 
           .unitLabel,
           .currencyPrefix {
-            color: #6b7280;
+            color: $gray-500;
             font-size: 0.875rem;
             white-space: nowrap;
           }
@@ -146,38 +146,38 @@
           &.itemName {
 
             .alertIcon {
-              color: #dc2626;
+              color: $red-600;
               margin-right: 10px;
             }
 
             span {
-              color: #111827;
+              color: $gray-900;
             }
           }
 
           &.category {
-            color: #6b7280;
+            color: $gray-500;
           }
 
           &.quantity {
-            color: #111827;
+            color: $gray-900;
 
             &.lowStock {
-              color: #dc2626;
+              color: $red-600;
               font-weight: 600;
             }
           }
 
           &.minStock {
-            color: #6b7280;
+            color: $gray-500;
           }
 
           &.price {
-            color: #111827;
+            color: $gray-900;
           }
 
           &.supplier {
-            color: #6b7280;
+            color: $gray-500;
           }
         }
       }
@@ -203,7 +203,7 @@
 .emptyState {
   text-align: center;
   padding: 3rem;
-  color: #6b7280;
+  color: $gray-500;
 }
 
 .actions {
@@ -220,29 +220,29 @@
     transition: background-color 0.2s;
 
     &.editButton {
-      color: #007bff;
+      color: $primary-blue;
 
       &:hover {
-        background-color: #eff6ff;
+        background-color: $blue-50;
       }
     }
 
     &.deleteButton {
-      color: #dc2626;
+      color: $red-600;
 
       &:hover {
-        background-color: #fef2f2;
+        background-color: $red-100;
       }
     }
   }
 }
 
-.summaryCard {
-  background-color: #fff;
-  border-radius: 0.75rem;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e5e7eb;
-  padding: 1.5rem;
+  .summaryCard {
+    background-color: $white;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 2px $shadow-light;
+    border: 1px solid $gray-200;
+    padding: 1.5rem;
 }
 
 .summaryGrid {
@@ -253,13 +253,13 @@
   .summaryItem {
     p:first-child {
       font-size: 0.875rem;
-      color: #6b7280;
+      color: $gray-500;
     }
 
     p:last-child {
       font-size: 1.25rem;
       font-weight: 600;
-      color: #111827;
+      color: $gray-900;
     }
   }
 }

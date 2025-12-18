@@ -1,13 +1,15 @@
+@use "sass:color";
+@use "../../scss/values.scss" as *;
 .wrapper {
   max-width: 48rem;
   margin: 0 auto;
 }
 
 .card {
-  background-color: #fff;
+  background-color: $white;
   border-radius: 0.75rem;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 2px $shadow-light;
+  border: 1px solid $gray-200;
   padding: 1.5rem;
 }
 
@@ -20,19 +22,19 @@
   h2 {
     font-size: 1.25rem;
     font-weight: 600;
-    color: #111827;
+    color: $gray-900;
   }
 
   .closeButton {
     padding: 0.5rem;
-    color: #9ca3af;
+    color: $gray-400;
     background: none;
     border: none;
     cursor: pointer;
     transition: color 0.2s;
 
     &:hover {
-      color: #6b7280;
+      color: $gray-500;
     }
   }
 }
@@ -58,7 +60,7 @@
     display: block;
     font-size: 0.875rem;
     font-weight: 500;
-    color: #374151;
+    color: $gray-700;
     margin-bottom: 0.5rem;
   }
 
@@ -66,13 +68,13 @@
   select {
     width: 100%;
     padding: 0.5rem 1rem;
-    border: 1px solid #d1d5db;
+    border: 1px solid $gray-300;
     border-radius: 0.5rem;
     outline: none;
 
     &:focus {
-      border-color: #007bff;
-      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+      border-color: $primary-blue;
+      box-shadow: 0 0 0 3px $shadow-blue;
     }
   }
 
@@ -87,7 +89,7 @@
   justify-content: flex-end;
   gap: 0.75rem;
   padding-top: 1rem;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid $gray-200;
 }
 
 .scanRow {
@@ -101,26 +103,26 @@
   }
 }
 
-.scanButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.9rem;
-  background-color: #0f172a;
-  color: #fff;
-  border: none;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
+  .scanButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.9rem;
+    background-color: $blue-900;
+    color: $white;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
 
-  &:hover {
-    background-color: #111827;
+    &:hover {
+      background-color: $gray-900;
+    }
   }
-}
 
 .scanner {
   margin-top: 0.75rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid $gray-200;
   border-radius: 0.5rem;
   overflow: hidden;
 }
@@ -129,7 +131,7 @@
   width: 100%;
   height: 240px;
   object-fit: cover;
-  background: #000;
+  background: $black;
 }
 
 .modalBackdrop {
@@ -145,7 +147,7 @@
 .modalCard {
   width: 92vw;
   max-width: 560px;
-  background: #fff;
+  background: $white;
   border-radius: 12px;
   box-shadow: 0 10px 24px rgba(0,0,0,0.2);
   overflow: hidden;
@@ -201,59 +203,59 @@
 .hint {
   margin-top: 0.25rem;
   font-size: 0.825rem;
-  color: #4b5563;
+  color: $gray-600;
 }
 
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  background: #e0f2fe;
-  color: #0ea5e9;
-  padding: 0.25rem 0.55rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: $blue-200;
+    color: $cyan-400;
+    padding: 0.25rem 0.55rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
 
 .cancelButton {
   padding: 0.5rem 1.5rem;
-  color: #374151;
-  background-color: #fff;
-  border: 1px solid #d1d5db;
+  color: $gray-700;
+  background-color: $white;
+  border: 1px solid $gray-300;
   border-radius: 0.5rem;
   cursor: pointer;
   transition: background-color 0.2s;
 
   &:hover {
-    background-color: #f9fafb;
+    background-color: $gray-50;
   }
 }
 
 .submitButton {
   padding: 0.5rem 1.5rem;
-  color: #fff;
-  background-color: #007bff;
+  color: $white;
+  background-color: $primary-blue;
   border: none;
   border-radius: 0.5rem;
   cursor: pointer;
   transition: background-color 0.2s;
 
   &:hover {
-    background-color: #0056b3;
+    background-color: color.adjust($primary-blue, $lightness: -10%);
   }
 }
 
 .tip {
   margin-top: 1.5rem;
   padding: 1rem;
-  background-color: #eff6ff;
-  border: 1px solid #bfdbfe;
+  background-color: $blue-50;
+  border: 1px solid $blue-100;
   border-radius: 0.5rem;
 
   p {
     font-size: 0.875rem;
-    color: #1e3a8a;
+    color: $navy;
 
     span {
       font-weight: 500;

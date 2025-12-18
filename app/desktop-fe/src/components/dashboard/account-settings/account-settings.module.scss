@@ -1,3 +1,4 @@
+@use "sass:color";
 @use "../../../scss/helpers/import" as *;
 
 .container {
@@ -15,26 +16,26 @@
 }
 
 .tabs {
-  background-color: #fff;
+  background-color: $white;
   border-radius: 0.75rem;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 2px $shadow-light;
+  border: 1px solid $gray-200;
   overflow: hidden;
 
   .tabSelectWrapper {
     display: none;
     padding: 0.75rem 1rem;
-    background-color: #fff;
-    border-bottom: 1px solid #e5e7eb;
+    background-color: $white;
+    border-bottom: 1px solid $gray-200;
   }
 
   .tabSelect {
     width: 100%;
     padding: 0.5rem 0.75rem;
-    border: 1px solid #d1d5db;
+    border: 1px solid $gray-300;
     border-radius: 0.5rem;
-    background-color: #fff;
-    color: #111827;
+    background-color: $white;
+    color: $gray-900;
     font-weight: 500;
     outline: none;
     appearance: none;
@@ -46,16 +47,16 @@
     padding-right: 2.5rem;
 
     &:focus {
-      border-color: #007bff;
-      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+      border-color: $primary-blue;
+      box-shadow: 0 0 0 3px $shadow-blue;
     }
   }
 
   .tabHeader {
     display: flex;
     flex-wrap: wrap;
-    border-bottom: 1px solid #e5e7eb;
-    background-color: #f9fafb;
+    border-bottom: 1px solid $gray-200;
+    background-color: $gray-50;
   }
 
   .tabButton {
@@ -63,18 +64,18 @@
     background: none;
     border: none;
     cursor: pointer;
-    color: #374151;
+    color: $gray-700;
     font-weight: 500;
     transition: background-color 0.15s, color 0.15s;
 
     &.active {
-      color: #111827;
-      background-color: #fff;
-      border-bottom: 2px solid #007bff;
+      color: $gray-900;
+      background-color: $white;
+      border-bottom: 2px solid $primary-blue;
     }
 
     &:hover {
-      background-color: #eef2f7;
+      background-color: $blue-50;
     }
   }
 
@@ -91,7 +92,7 @@
 
 .card {
   width: 100%;
-  background-color: #fff;
+  background-color: $white;
   padding: 1.5rem;
   box-sizing: border-box;
 
@@ -99,7 +100,7 @@
   .cardTitle {
     font-size: 1.125rem;
     font-weight: 600;
-    color: #111827;
+    color: $gray-900;
     margin-bottom: 1rem;
   }
 }
@@ -113,20 +114,20 @@
   display: block;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #374151;
+  color: $gray-700;
 }
 
 .input,
 .select {
   width: 100%;
   padding: 0.5rem 1rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid $gray-300;
   border-radius: 0.5rem;
   outline: none;
 
   &:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    border-color: $primary-blue;
+    box-shadow: 0 0 0 3px $shadow-blue;
   }
 }
 
@@ -141,7 +142,7 @@
   align-items: center;
   justify-content: flex-end;
   gap: 0.75rem;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid $gray-200;
   @include responsive (sm) {
     flex-direction: column;
     align-items: stretch;
@@ -151,8 +152,8 @@
 
 .button {
   padding: 0.5rem 1.25rem;
-  color: #fff;
-  background-color: #007bff;
+  color: $white;
+  background-color: $primary-blue;
   border: none;
   border-radius: 0.5rem;
   cursor: pointer;
@@ -164,7 +165,7 @@
   }
 
   &:hover {
-    background-color: #0056b3;
+    background-color: color.adjust($primary-blue, $lightness: -10%);
   }
 
 
@@ -172,10 +173,10 @@
 
 .notice {
   padding: 0.75rem 1rem;
-  background-color: #eff6ff;
-  border: 1px solid #bfdbfe;
+  background-color: $blue-50;
+  border: 1px solid $blue-100;
   border-radius: 0.5rem;
-  color: #1e3a8a;
+  color: $navy;
 }
 
 .floatingNotice {
@@ -192,10 +193,10 @@
   max-width: 360px;
   aspect-ratio: 2 / 1;
   box-sizing: border-box;
-  background-color: #eff6ff;
-  border: 1px solid #bfdbfe;
+  background-color: $blue-50;
+  border: 1px solid $blue-100;
   border-radius: 0.75rem;
-  color: #1e3a8a;
+  color: $navy;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
   pointer-events: auto;
   will-change: transform, opacity;
@@ -234,14 +235,14 @@
 .floatingClose {
   background: transparent;
   border: none;
-  color: #1e3a8a;
+  color: $navy;
   font-size: 1.15rem;
   cursor: pointer;
   line-height: 1;
   align-self: flex-start;
 
   &:hover {
-    color: #0f2166;
+    color: $navy-dark;
   }
 }
 
@@ -288,20 +289,20 @@
 .toggleLabel {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #374151;
+  color: $gray-700;
 }
 
 .toggleDescription {
   margin: 0.2rem 0 0;
   font-size: 0.8125rem;
-  color: #6b7280;
+  color: $gray-500;
 }
 
 .toggle {
   position: relative;
   width: 44px;
   height: 24px;
-  background-color: #e5e7eb;
+  background-color: $gray-200;
   border-radius: 9999px;
   transition: background-color 0.2s ease;
 }
@@ -312,14 +313,14 @@
   left: 2px;
   width: 20px;
   height: 20px;
-  background-color: #fff;
+  background-color: $white;
   border-radius: 50%;
   box-shadow: 0 1px 2px rgba(0,0,0,0.1);
   transition: transform 0.2s ease;
 }
 
 .toggleOn {
-  background-color: #007bff;
+  background-color: $primary-blue;
 }
 
 .toggleOn .toggleKnob {
@@ -327,20 +328,20 @@
 }
 
 .toggleDisabled {
-  background-color: #d1d5db !important;
+  background-color: $gray-300 !important;
 }
 
 .toggleDisabled .toggleKnob {
   transform: translateX(0) !important;
-  background-color: #f3f4f6;
+  background-color: $gray-100;
   box-shadow: none;
 }
 
 .buttonSecondary {
   padding: 0.35rem 0.9rem;
-  color: #111827;
-  background-color: #eef2f7;
-  border: 1px solid #d1d5db;
+  color: $gray-900;
+  background-color: $blue-50;
+  border: 1px solid $gray-300;
   border-radius: 0.5rem;
   cursor: pointer;
   transition: background-color 0.2s;
@@ -351,7 +352,7 @@
   }
 
   &:hover:not(:disabled) {
-    background-color: #e5e7eb;
+    background-color: $gray-200;
   }
 }
 

@@ -13,10 +13,10 @@
 }
 
 .statCard {
-  background-color: #fff;
+  background-color: $white;
   border-radius: 0.75rem;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 2px $shadow-light;
+  border: 1px solid $gray-200;
   padding: 1.5rem;
 
   .statContent {
@@ -27,13 +27,13 @@
     .statInfo {
       p {
         font-size: 0.875rem;
-        color: #6b7280;
+        color: $gray-500;
       }
 
       h3 {
         font-size: 1.5rem;
         font-weight: 600;
-        color: #111827;
+        color: $gray-900;
         margin-top: 0.25rem;
       }
     }
@@ -43,23 +43,23 @@
       border-radius: 0.5rem;
 
       &.blue {
-        background-color: #dbeafe;
-        color: #007bff;
+        background-color: $blue-100;
+        color: $primary-blue;
       }
 
       &.red {
-        background-color: #fee2e2;
-        color: #dc2626;
+        background-color: $red-100;
+        color: $red-600;
       }
 
       &.green {
-        background-color: #d1fae5;
-        color: #059669;
+        background-color: $green-100;
+        color: $green-600;
       }
 
       &.purple {
-        background-color: #e9d5ff;
-        color: #9333ea;
+        background-color: $purple-100;
+        color: $purple-600;
       }
     }
   }
@@ -76,16 +76,16 @@
 }
 
 .card {
-  background-color: #fff;
+  background-color: $white;
   border-radius: 0.75rem;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 2px $shadow-light;
+  border: 1px solid $gray-200;
   padding: 1.5rem;
 
   h2 {
     font-size: 1.125rem;
     font-weight: 600;
-    color: #111827;
+    color: $gray-900;
     margin-bottom: 1rem;
   }
 }
@@ -93,7 +93,7 @@
 .emptyState {
   text-align: center;
   padding: 2rem;
-  color: #6b7280;
+  color: $gray-500;
 }
 
 .alertList {
@@ -107,7 +107,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem;
-  background-color: #fef2f2;
+  background-color: $red-100;
   border-radius: 0.5rem;
   border: 1px solid #fecaca;
 
@@ -117,18 +117,18 @@
     gap: 0.75rem;
 
     .alertIcon {
-      color: #dc2626;
+      color: $red-600;
     }
 
     .alertInfo {
-      p:first-child {
+        p:first-child {
         font-weight: 500;
-        color: #111827;
+        color: $gray-900;
       }
 
-      p:last-child {
+        p:last-child {
         font-size: 0.875rem;
-        color: #6b7280;
+        color: $gray-500;
       }
     }
   }
@@ -138,12 +138,12 @@
 
     p:first-child {
       font-weight: 600;
-      color: #dc2626;
+      color: $red-600;
     }
 
     p:last-child {
       font-size: 0.75rem;
-      color: #9ca3af;
+      color: $gray-400;
     }
   }
 }
@@ -161,25 +161,25 @@
     justify-content: space-between;
     margin-bottom: 0.5rem;
 
-    span:first-child {
+      span:first-child {
       font-weight: 500;
-      color: #111827;
+      color: $gray-900;
     }
 
     span:last-child {
       font-size: 0.875rem;
-      color: #6b7280;
+      color: $gray-500;
     }
   }
 
   .progressBar {
     width: 100%;
-    background-color: #e5e7eb;
+    background-color: $gray-200;
     border-radius: 9999px;
     height: 0.5rem;
 
     .progressFill {
-      background-color: #007bff;
+      background-color: $primary-blue;
       height: 0.5rem;
       border-radius: 9999px;
       transition: width 0.3s;
@@ -188,7 +188,7 @@
 
   .categoryCount {
     font-size: 0.875rem;
-    color: #9ca3af;
+    color: $gray-400;
     margin-top: 0.25rem;
   }
 }
@@ -202,26 +202,26 @@
     border-collapse: collapse;
 
     thead tr {
-      border-bottom: 1px solid #e5e7eb;
+      border-bottom: 1px solid $gray-200;
 
       th {
         text-align: left;
         padding: 0.75rem 1rem;
         font-size: 0.875rem;
         font-weight: 500;
-        color: #6b7280;
+        color: $gray-500;
       }
     }
 
     tbody tr {
-      border-bottom: 1px solid #f3f4f6;
+      border-bottom: 1px solid $gray-100;
 
       td {
         padding: 0.75rem 1rem;
-        color: #111827;
+        color: $gray-900;
 
         &.category {
-          color: #6b7280;
+          color: $gray-500;
         }
 
         &.date {
