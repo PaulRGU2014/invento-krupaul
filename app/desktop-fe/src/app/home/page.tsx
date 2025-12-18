@@ -197,6 +197,12 @@ export default function HomePage() {
           >
             {t("home.nav.settings", "Settings")}
           </button>
+          <button
+            onClick={() => router.push('/billing')}
+            className={styles.navButton}
+          >
+            {t("home.nav.billing", "Billing")}
+          </button>
         </div>
       </nav>
 
