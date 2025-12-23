@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { getSessionToken } from './inventory-api';
 
 type Entitlements = Record<string, number | null>;
 
@@ -21,21 +22,35 @@ export function useEntitlements(): EntitlementsState {
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch('/api/billing/entitlements', { signal: controller.signal })
-      .then(async (res) => {
+    const load = async () => {
+      try {
+        setIsLoading(true);
+        const token = await getSessionToken();
+        if (!token) {
+          throw new Error('Not authenticated');
+        }
+
+        const res = await fetch('/api/billing/entitlements', {
+          signal: controller.signal,
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
         const json = await res.json().catch(() => ({ success: false, error: 'Invalid JSON' }));
         if (!res.ok || json.success === false) {
           throw new Error(json.error || 'Failed to load entitlements');
         }
         setEntitlements(json.entitlements || {});
         setError(undefined);
-      })
-      .catch((err: unknown) => {
+      } catch (err: unknown) {
         if (err instanceof DOMException && err.name === 'AbortError') return;
         setEntitlements({});
         setError(err instanceof Error ? err.message : 'Unexpected error');
-      })
-      .finally(() => setIsLoading(false));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    void load();
 
     return () => controller.abort();
   }, [refreshKey]);
