@@ -25,8 +25,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  modal,
 }: Readonly<{
   children: React.ReactNode;
+  modal: React.ReactNode;
 }>) {
   return (
     <html lang="en">
@@ -36,7 +38,10 @@ export default function RootLayout({
             <LanguageSwitcher />
           </div>
           <AuthProvider>
-            <SupabaseProvider>{children}</SupabaseProvider>
+            <SupabaseProvider>
+              {children}
+              {modal}
+            </SupabaseProvider>
           </AuthProvider>
         </I18nProvider>
       </body>
